@@ -5,7 +5,7 @@ from google import genai
 from datetime import date
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-GEMINI_MODEL = "gemini-3.5-flash"
+GEMINI_MODEL = "gemini-2.5-flash"
 
 FORMAT_PROMPT = r"""
 You are an academic note formatter for a biomedical engineering student at the University of Florida.
@@ -41,6 +41,7 @@ type: "notes"
 # 📐 Key Equations
 - List all equations in LaTeX, labeled clearly.
 - Use $$ for display equations.
+- Preserve all summation signs with their limits: $\sum_{i=1}^{n}$
 - If none, write "None."
 
 # 🖼️ Diagrams
@@ -76,20 +77,23 @@ type: "problems"
 ONLY include this section if the notes explicitly contain problems or questions with worked solutions.
 If no problems exist, omit this section entirely.
 
-Format each problem exactly like this:
-- **Problem 1a: [Problem Title or short description]**
-  - [Typed question text exactly as written]
-  - [Each step of the derivation as a sub-bullet]
-  - [LaTeX equations inline or display depending on how they appear in the notes]
-  - If a diagram is part of the problem or solution, include it inline here:
-    - [IMAGE: description] — describe fully so the problem can be reconstructed
-  - Side calculations/notes (if present):
-    - [sub-bullets for any scratch work or annotations]
+Format each problem exactly as it appears in the transcription.
+- Do not reorganize, relabel, or split work into sub-parts that are not explicitly labeled in the original.
+- If the student wrote all work under "Problem 1" with no sub-labels, keep it all under "Problem 1."
+- If the problem has labeled parts (1a, 1b, 1c), preserve those exact labels — do not add or remove any.
+- Mirror the exact grouping and order of work from the page. Do not reorder steps or consolidate separate problems.
+- Each step of the derivation as a sub-bullet in the order it appears.
+- LaTeX equations inline or display depending on how they appear in the notes.
+- If a diagram is part of the problem or solution, include it inline here:
+  - [IMAGE: description] — describe fully so the problem can be reconstructed.
+- Side calculations/notes (if present):
+  - Sub-bullets for any scratch work or annotations, placed where they appear on the page.
 
-Match the structure of the handwritten derivation as closely as possible.
-Preserve Step ①, Step ② markers exactly as transcribed.
+Preserve Step ①, Step ② markers for circled numbers exactly as transcribed.
+Preserve Step Ⓐ, Step Ⓑ markers for circled letters exactly as transcribed.
 Use nested bullet points for stepped derivations. If the student worked it out inline, keep it inline.
 Always use LaTeX for equations. Use $$ for display, $ for inline.
+Preserve all summation signs with their limits: $\sum_{i=1}^{n}$
 
 # ❓ Errors / Questions / Gaps
 - Bullet points of anything incomplete, unclear, potentially incorrect, or worth flagging.
@@ -104,6 +108,7 @@ Always use LaTeX for equations. Use $$ for display, $ for inline.
 # 📐 Key Equations
 - List all important equations used across the problems in LaTeX, labeled clearly.
 - Use $$ for display equations.
+- Preserve all summation signs with their limits.
 - If none, write "None."
 
 # 🔗 Connections
@@ -146,6 +151,7 @@ If a diagram is part of a problem or solution, include it inline within that pro
 # 📐 Key Equations
 - All important equations from both notes and problems in LaTeX, labeled clearly.
 - Use $$ for display equations.
+- Preserve all summation signs with their limits.
 - If none, write "None."
 
 # 🔗 Connections
@@ -158,7 +164,9 @@ GLOBAL RULES — apply to all templates:
 - Convert ALL equations to LaTeX — never leave raw text math.
 - Do not invent content that was not in the transcription.
 - Do not add filler text or generic statements.
-- Preserve Step ①②③ markers exactly where they appear.
+- Do not reorganize or relabel any problem structure — mirror the page exactly.
+- Preserve Step ①②③ markers for circled numbers exactly where they appear.
+- Preserve Step ⒶⒷⒸ markers for circled letters exactly where they appear.
 - Every [IMAGE: ...] from the transcription must appear somewhere in the output — either inline in a problem, inline in notes, or in the Diagrams section. Never drop an image.
 - Return only raw markdown. Do not wrap the output in a code block or backticks of any kind.
 """

@@ -33,6 +33,8 @@ Transcribe ALL pages in order. For each page use this exact format:
 CRITICAL RULES — read carefully before transcribing:
 
 1. COMPLETENESS: Scan every region of the page before moving on.
+   - Divide each page mentally into a 3x3 grid (top-left, top-center, top-right, middle-left, center, middle-right, bottom-left, bottom-center, bottom-right).
+   - Scan each of the 9 zones explicitly before moving on.
    - Top, bottom, margins, and corners all may contain content.
    - Do not skip any handwritten content even if it looks like scratch work.
    - If you are unsure what a word or symbol says, write your best guess in [brackets] like [unclear: possibly "flux"].
@@ -40,14 +42,30 @@ CRITICAL RULES — read carefully before transcribing:
 
 2. SMALL AND DENSE MATH — THIS IS CRITICAL:
    - Actively look for small handwriting. Students often write subscripts, superscripts, and intermediate steps very small.
+   - After transcribing each equation, zoom in mentally on every term and ask: "Is there a subscript, superscript, or small modifier I missed?"
    - Scrutinize every equation for:
      * Subscripts: $x_i$, $C_{HEP}$, $\dot{m}_{in}$
      * Superscripts: $x^2$, $e^{-kt}$
-     * Integral signs: $\int$, $\oint$, with their limits above and below
+     * Integral signs with limits: $\int_a^b$, $\oint$
      * Derivative notation: $\frac{d}{dt}$, $\frac{\partial}{\partial x}$, $\dot{x}$, $\ddot{x}$
-     * Greek letters: $\alpha$, $\beta$, $\mu$, $\rho$, $\Delta$, $\Sigma$, $\omega$
+     * Greek letters: $\alpha$, $\beta$, $\gamma$, $\delta$, $\epsilon$, $\zeta$, $\eta$, $\theta$, $\lambda$, $\mu$, $\nu$, $\xi$, $\pi$, $\rho$, $\sigma$, $\tau$, $\phi$, $\chi$, $\psi$, $\omega$, $\Omega$, $\Delta$, $\Sigma$, $\Gamma$, $\Lambda$, $\Phi$, $\Psi$
      * Fraction bars — check both numerator and denominator carefully
-     * Dot notation for rates: $\dot{V}$, $\dot{M}$, $\dot{n}$
+     * Dot notation for rates: $\dot{V}$, $\dot{M}$, $\dot{n}$, $\dot{Q}$, $\dot{W}$
+     * Summation: $\sum_{i=1}^{n}$, $\sum_{k=0}^{\infty}$
+     * Product notation: $\prod_{i=1}^{n}$
+     * Vector and matrix notation: $\vec{F}$, $\hat{n}$, $\mathbf{A}$, $\mathbf{x}$
+     * Nabla / gradient / divergence / curl: $\nabla$, $\nabla^2$, $\nabla \cdot \vec{F}$, $\nabla \times \vec{F}$
+     * Laplacian: $\nabla^2 f$, $\frac{\partial^2 f}{\partial x^2}$
+     * Statistical notation: $\bar{x}$, $\hat{x}$, $\sigma^2$, $\mu \pm \sigma$, $\tilde{x}$
+     * Convolution: $f * g$
+     * Unit step and impulse functions: $u(t)$, $\delta(t)$
+     * Infinity and limits: $\infty$, $\lim_{x \to 0}$, $\lim_{t \to \infty}$
+     * Absolute value and norms: $|x|$, $\|x\|$, $\|x\|_2$
+     * Piecewise / conditional notation: braces with conditions
+     * Fourier / Laplace transform notation: $\mathcal{F}$, $\mathcal{L}$, $\hat{f}(\omega)$, $F(s)$
+     * Transfer functions and s-domain: $H(s)$, $G(s)$, $s = j\omega$
+     * Exponential and complex: $e^{j\omega t}$, $e^{st}$, $j = \sqrt{-1}$
+     * Logical / set notation if present: $\in$, $\subset$, $\cup$, $\cap$, $\forall$, $\exists$
    - If a symbol is small but present, transcribe it. Do not silently drop it.
    - If genuinely illegible due to size, flag it: [illegible small text]
 
@@ -75,7 +93,7 @@ CRITICAL RULES — read carefully before transcribing:
    - If the diagram is part of a problem, describe it in enough detail that the problem could be fully reconstructed from your description alone.
    - Include any handwritten labels, arrows, or annotations on or around the diagram.
 
-8. CIRCLED STEP NUMBERS: If you see circled numbers (①②③ or handwritten numbers in circles) marking ordered steps, preserve them as:
+8. CIRCLED STEP NUMBERS AND LETTERS: If you see circled numbers (①②③) or circled letters (ⒶⒷⒸ) marking ordered steps, preserve them as:
    Step ①: [content]
    Step ②: [content]
    Do not reorder or renumber steps.
@@ -83,9 +101,10 @@ CRITICAL RULES — read carefully before transcribing:
 9. PROBLEM STRUCTURE: Preserve exact problem labeling (1a, 1b, 1c or a, b, c).
    Transcribe the typed question text first, then all handwritten work beneath it in order.
 
-10. FINAL CHECK: Before submitting your transcription of each page, re-examine the image one more time.
-    Ask yourself: "Is there any small handwriting, subscript, superscript, integral, or symbol I have not yet captured?"
-    If yes, add it before moving to the next page.
+10. FINAL CHECK: Before submitting your transcription of each page, do two passes:
+    Pass 1 — re-examine the full image and ask: "Is there any region of the 3x3 grid I have not yet captured?"
+    Pass 2 — re-examine every equation and ask: "Is there any subscript, superscript, Greek letter, summation, vector, or small symbol I have not yet captured?"
+    Add anything missing before moving to the next page.
 """
 
 def call_gemini(model, contents, max_retries=5):
@@ -133,7 +152,7 @@ def transcribe_images(images, sleep_between_calls=2.0, max_retries=5):
 
     # Fall back if primary failed
     if response is None:
-        print(f"  ⚠️ {PRIMARY_MODEL} failed. Falling back to {FALLBACK_MODEL}...")
+        print(f"  Warning: {PRIMARY_MODEL} failed. Falling back to {FALLBACK_MODEL}...")
         response = call_gemini(FALLBACK_MODEL, contents, max_retries)
 
     if response is None:
@@ -144,7 +163,7 @@ def transcribe_images(images, sleep_between_calls=2.0, max_retries=5):
     usage = getattr(response, "usage_metadata", None)
     total_tokens = getattr(usage, "total_token_count", 0)
 
-    print(f"  ✅ Transcription done — {total_tokens} tokens — model: {model_used}")
+    print(f"  Transcription done — {total_tokens} tokens — model: {model_used}")
 
     pages = split_pages(raw, len(images))
 
