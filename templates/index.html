@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Notes Pipeline</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f2ed;
+      --surface: #ffffff;
+      --ink: #1a1612;
+      --ink2: #6b6560;
+      --ink3: #b5b0aa;
+      --rule: #e2ddd8;
+      --punch: #d4501a;
+      --punch-light: #d4501a18;
+      --success: #2a7a4b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+    }
+
+    /* Noise texture overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.5;
+    }
+
+    /* Layout */
+    .shell {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--ink);
+      color: #f5f2ed;
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 0.4rem;
+    }
+
+    .sidebar-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: #6b6560;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 3rem;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: #6b6560;
+      cursor: default;
+      transition: all 0.15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .nav-item.active {
+      background: rgba(255,255,255,0.07);
+      color: #f5f2ed;
+    }
+
+    .nav-item i { width: 16px; text-align: center; font-size: 0.75rem; }
+
+    .nav-stage-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #3a3530;
+      margin-left: auto;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+
+    .nav-item.stage-done .nav-stage-dot { background: var(--success); }
+    .nav-item.stage-active .nav-stage-dot { background: var(--punch); animation: pulse-dot 1s ease-in-out infinite; }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .sidebar-footer {
+      border-top: 1px solid #2a2520;
+      padding-top: 1.5rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: #3a3530;
+      line-height: 1.8;
+    }
+
+    /* Main content */
+    .main {
+      padding: 3rem 3.5rem;
+      max-width: 780px;
+    }
+
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: -0.04em;
+      margin-bottom: 0.4rem;
+      line-height: 1;
+    }
+
+    .page-sub {
+      color: var(--ink2);
+      font-size: 0.85rem;
+      margin-bottom: 3rem;
+    }
+
+    /* Section headers */
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--punch);
+      letter-spacing: 0.05em;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+
+    .section-rule {
+      flex: 1;
+      height: 1px;
+      background: var(--rule);
+    }
+
+    .section-block {
+      margin-bottom: 2.5rem;
+    }
+
+    /* Dropzone */
+    .dropzone {
+      background: var(--surface) !important;
+      border: 1.5px dashed var(--rule) !important;
+      border-radius: 10px !important;
+      min-height: 160px !important;
+      transition: border-color 0.2s, background 0.2s !important;
+      cursor: pointer;
+    }
+
+    .dropzone:hover, .dropzone.dz-drag-hover {
+      border-color: var(--punch) !important;
+      background: var(--punch-light) !important;
+    }
+
+    .dropzone .dz-message {
+      margin: 0 !important;
+      padding: 3rem 2rem !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .dz-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: var(--rule);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: var(--ink2);
+    }
+
+    .dz-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      color: var(--ink2);
+      font-weight: 400;
+    }
+
+    .dz-label span {
+      color: var(--punch);
+      font-weight: 500;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .dz-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--ink3);
+      letter-spacing: 0.05em;
+    }
+
+    .dropzone .dz-preview .dz-image { border-radius: 6px !important; }
+    .dropzone .dz-preview .dz-filename span {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+    }
+
+    /* Inputs */
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .field label {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink2);
+      margin-bottom: 0.5rem;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--rule);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field input:focus {
+      border-color: var(--punch);
+      box-shadow: 0 0 0 3px var(--punch-light);
+    }
+
+    .field input::placeholder { color: var(--ink3); }
+
+    /* Run button */
+    .btn-run {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 1.5rem;
+      width: 100%;
+      background: var(--ink);
+      color: var(--bg);
+      border: none;
+      border-radius: 8px;
+      padding: 0.875rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn-run:hover { opacity: 0.85; }
+    .btn-run:active { transform: scale(0.99); }
+    .btn-run:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* Progress panel */
+    #progress-panel { display: none; }
+
+    /* Progress bar */
+    .progress-wrap {
+      background: var(--rule);
+      border-radius: 99px;
+      height: 3px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--punch);
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Stage list */
+    .stages {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-bottom: 1.5rem;
+      border: 1.5px solid var(--rule);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .stage-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--rule);
+      transition: background 0.2s;
+    }
+
+    .stage-row:last-child { border-bottom: none; }
+    .stage-row.s-active { background: #fdf8f5; }
+    .stage-row.s-done { background: #f6faf8; }
+
+    .stage-indicator {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      flex-shrink: 0;
+      background: var(--rule);
+      color: var(--ink3);
+      font-family: 'DM Mono', monospace;
+      transition: all 0.3s;
+    }
+
+    .stage-row.s-active .stage-indicator {
+      background: var(--punch-light);
+      color: var(--punch);
+    }
+
+    .stage-row.s-done .stage-indicator {
+      background: #d4edde;
+      color: var(--success);
+    }
+
+    .stage-row.s-error .stage-indicator {
+      background: #fde8e8;
+      color: #cc3333;
+    }
+
+    .stage-name {
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--ink2);
+      flex: 1;
+      transition: color 0.2s;
+    }
+
+    .stage-row.s-active .stage-name { color: var(--ink); font-weight: 500; }
+    .stage-row.s-done .stage-name { color: var(--success); }
+
+    .stage-status {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--ink3);
+    }
+
+    .stage-row.s-active .stage-status { color: var(--punch); }
+    .stage-row.s-done .stage-status { color: var(--success); }
+
+    /* Log */
+    .log-wrap {
+      background: var(--ink);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      max-height: 130px;
+      overflow-y: auto;
+      margin-bottom: 1.5rem;
+    }
+
+    .log-line {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: #6b6560;
+      line-height: 1.7;
+    }
+
+    .log-line.l-accent { color: #d4501a; }
+    .log-line.l-ok { color: #2a7a4b; }
+    .log-line.l-error { color: #cc3333; }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1.5px solid var(--rule);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+    }
+
+    .stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink3);
+      margin-bottom: 0.35rem;
+    }
+
+    .stat-val {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+
+    /* Buttons */
+    .btn-download {
+      display: none;
+      width: 100%;
+      background: var(--punch);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.875rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: opacity 0.15s;
+      margin-bottom: 0.6rem;
+    }
+
+    .btn-download:hover { opacity: 0.88; }
+
+    .btn-reset {
+      display: none;
+      width: 100%;
+      background: transparent;
+      border: 1.5px solid var(--rule);
+      color: var(--ink2);
+      border-radius: 8px;
+      padding: 0.7rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .btn-reset:hover { border-color: var(--ink); color: var(--ink); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #3a3530; border-radius: 2px; }
+
+    /* Animations */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+
+    .fade-in {
+      animation: fadein 0.4s ease both;
+    }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Notes<br>Pipeline</div>
+    <div class="sidebar-sub">v2.0 — UF BME</div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-item active">
+        <i class="fa fa-upload"></i> Upload
+        <span class="nav-stage-dot" id="dot-1"></span>
+      </div>
+      <div class="nav-item" id="nav-transcribe">
+        <i class="fa fa-robot"></i> Transcription
+        <span class="nav-stage-dot" id="dot-2"></span>
+      </div>
+      <div class="nav-item" id="nav-format">
+        <i class="fa fa-align-left"></i> Formatting
+        <span class="nav-stage-dot" id="dot-3"></span>
+      </div>
+      <div class="nav-item" id="nav-connect">
+        <i class="fa fa-project-diagram"></i> Connections
+        <span class="nav-stage-dot" id="dot-4"></span>
+      </div>
+      <div class="nav-item" id="nav-obsidian">
+        <i class="fa fa-save"></i> Obsidian
+        <span class="nav-stage-dot" id="dot-5"></span>
+      </div>
+      <div class="nav-item" id="nav-tracker">
+        <i class="fa fa-calendar-check"></i> Tracker
+        <span class="nav-stage-dot" id="dot-6"></span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      GEMINI_API_KEY ✓<br>
+      gemini-2.5-flash<br>
+      localhost:5000
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Upload Panel -->
+    <div id="upload-panel">
+      <div class="page-title">New Note</div>
+      <div class="page-sub">Drop a PDF from OneNote to begin processing</div>
+
+      <!-- Upload -->
+      <div class="section-block">
+        <div class="section-head">
+          <span class="section-num">01</span>
+          <span class="section-title">PDF Upload</span>
+          <div class="section-rule"></div>
+        </div>
+        <form id="pdf-dropzone" class="dropzone" action="/run">
+          <div class="dz-message">
+            <div class="dz-icon"><i class="fa fa-file-pdf"></i></div>
+            <div class="dz-label">Drop your PDF here, or <span>browse</span></div>
+            <div class="dz-sub">ONE NOTE EXPORT · PDF FORMAT ONLY</div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Configure -->
+      <div class="section-block">
+        <div class="section-head">
+          <span class="section-num">02</span>
+          <span class="section-title">Configure</span>
+          <div class="section-rule"></div>
+        </div>
+        <div class="input-row">
+          <div class="field">
+            <label>Course Code</label>
+            <input type="text" id="course" placeholder="e.g. BME3503" autocomplete="off"/>
+          </div>
+          <div class="field">
+            <label>Topic</label>
+            <input type="text" id="topic" placeholder="e.g. Membrane Potential" autocomplete="off"/>
+          </div>
+        </div>
+        <button class="btn-run" id="run-btn" onclick="startPipeline()">
+          <i class="fa fa-play"></i> Run Pipeline
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress Panel -->
+    <div id="progress-panel">
+      <div class="page-title fade-in">Processing</div>
+      <div class="page-sub fade-in" id="progress-subtitle">Starting pipeline...</div>
+
+      <div class="progress-wrap fade-in">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+
+      <!-- Stages -->
+      <div class="section-block fade-in">
+        <div class="section-head">
+          <span class="section-num">—</span>
+          <span class="section-title">Pipeline Stages</span>
+          <div class="section-rule"></div>
+        </div>
+        <div class="stages">
+          <div class="stage-row" id="stage-1">
+            <div class="stage-indicator" id="si-1">01</div>
+            <div class="stage-name">PDF → Images</div>
+            <div class="stage-status" id="ss-1">waiting</div>
+          </div>
+          <div class="stage-row" id="stage-2">
+            <div class="stage-indicator" id="si-2">02</div>
+            <div class="stage-name">Transcription</div>
+            <div class="stage-status" id="ss-2">waiting</div>
+          </div>
+          <div class="stage-row" id="stage-3">
+            <div class="stage-indicator" id="si-3">03</div>
+            <div class="stage-name">Formatting</div>
+            <div class="stage-status" id="ss-3">waiting</div>
+          </div>
+          <div class="stage-row" id="stage-4">
+            <div class="stage-indicator" id="si-4">04</div>
+            <div class="stage-name">Connections</div>
+            <div class="stage-status" id="ss-4">waiting</div>
+          </div>
+          <div class="stage-row" id="stage-5">
+            <div class="stage-indicator" id="si-5">05</div>
+            <div class="stage-name">Write to Obsidian</div>
+            <div class="stage-status" id="ss-5">waiting</div>
+          </div>
+          <div class="stage-row" id="stage-6">
+            <div class="stage-indicator" id="si-6">06</div>
+            <div class="stage-name">Spaced Rep. Tracker</div>
+            <div class="stage-status" id="ss-6">waiting</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Log -->
+      <div class="section-block fade-in">
+        <div class="section-head">
+          <span class="section-num">—</span>
+          <span class="section-title">Live Log</span>
+          <div class="section-rule"></div>
+        </div>
+        <div class="log-wrap" id="log"></div>
+      </div>
+
+      <!-- Stats (shown on complete) -->
+      <div id="stats-section" style="display:none" class="section-block fade-in">
+        <div class="section-head">
+          <span class="section-num">—</span>
+          <span class="section-title">Run Summary</span>
+          <div class="section-rule"></div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Model</div>
+            <div class="stat-val" id="s-model">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Tokens</div>
+            <div class="stat-val" id="s-tokens">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Pages</div>
+            <div class="stat-val" id="s-pages">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Connections</div>
+            <div class="stat-val" id="s-connections">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Cache Hit</div>
+            <div class="stat-val" id="s-cache">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Status</div>
+            <div class="stat-val" id="s-status" style="color:var(--success)">—</div>
+          </div>
+        </div>
+      </div>
+
+      <a class="btn-download" id="download-btn">
+        <i class="fa fa-download" style="margin-right:0.5rem;"></i>Download notes.md
+      </a>
+      <button class="btn-reset" id="reset-btn" onclick="resetForm()">
+        ← Run another note
+      </button>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  Dropzone.autoDiscover = false;
+  let myDropzone, uploadedFile, currentStage = 0;
+  const stageProgress = {1:14, 2:35, 3:58, 4:74, 5:88, 6:100};
+  const navIds = {1:'nav-1', 2:'nav-transcribe', 3:'nav-format', 4:'nav-connect', 5:'nav-obsidian', 6:'nav-tracker'};
+  const dotIds = {1:'dot-1', 2:'dot-2', 3:'dot-3', 4:'dot-4', 5:'dot-5', 6:'dot-6'};
+
+  myDropzone = new Dropzone("#pdf-dropzone", {
+    url: "/run",
+    autoProcessQueue: false,
+    maxFiles: 1,
+    acceptedFiles: ".pdf",
+    addRemoveLinks: true,
+    dictDefaultMessage: "",
+    init: function() {
+      this.on("addedfile", function(file) {
+        if (this.files.length > 1) this.removeFile(this.files[0]);
+        uploadedFile = file;
+      });
+      this.on("removedfile", function() { uploadedFile = null; });
+    }
+  });
+
+  function setStage(n, state) {
+    const row = document.getElementById(`stage-${n}`);
+    const ind = document.getElementById(`si-${n}`);
+    const status = document.getElementById(`ss-${n}`);
+    const dot = document.getElementById(dotIds[n]);
+    const nav = document.getElementById(navIds[n]);
+
+    row.className = `stage-row s-${state}`;
+
+    if (state === 'active') {
+      ind.innerHTML = '<i class="fa fa-circle-notch spin"></i>';
+      status.textContent = 'running';
+      if (dot) { dot.parentElement.classList.add('stage-active'); dot.parentElement.classList.remove('stage-done'); }
+    } else if (state === 'done') {
+      ind.innerHTML = '<i class="fa fa-check"></i>';
+      status.textContent = 'done';
+      if (dot) { dot.parentElement.classList.add('stage-done'); dot.parentElement.classList.remove('stage-active'); }
+    } else if (state === 'error') {
+      ind.innerHTML = '<i class="fa fa-times"></i>';
+      status.textContent = 'error';
+    }
+  }
+
+  function log(msg, type='') {
+    const el = document.getElementById('log');
+    const line = document.createElement('div');
+    line.className = `log-line ${type}`;
+    const ts = new Date().toLocaleTimeString('en-US', {hour12:false});
+    line.textContent = `${ts}  ${msg}`;
+    el.appendChild(line);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function setProgress(pct) {
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-subtitle').textContent = pct === 100 ? 'Complete' : `Stage ${currentStage} of 6 — ${pct}%`;
+  }
+
+  function handleEvent(data) {
+    if (data.stage && data.stage !== currentStage) {
+      if (currentStage > 0) setStage(currentStage, 'done');
+      currentStage = data.stage;
+      setStage(currentStage, 'active');
+      setProgress(stageProgress[currentStage] - 10);
+    }
+
+    if (data.message) log(data.message, data.error ? 'l-error' : data.done ? 'l-ok' : '');
+
+    if (data.done && !data.error) {
+      setStage(currentStage, 'done');
+      setProgress(100);
+
+      if (data.stats) {
+        const s = data.stats;
+        document.getElementById('s-model').textContent = s.model || '—';
+        document.getElementById('s-tokens').textContent = s.cached ? 'cached' : (s.total_tokens ? s.total_tokens.toLocaleString() : '—');
+        document.getElementById('s-pages').textContent = s.pages ?? '—';
+        document.getElementById('s-connections').textContent = s.connections ?? '0';
+        document.getElementById('s-cache').textContent = s.cached ? 'yes' : 'no';
+        document.getElementById('s-status').textContent = 'done ✓';
+        document.getElementById('stats-section').style.display = 'block';
+      }
+
+      if (data.download_url) {
+        const btn = document.getElementById('download-btn');
+        btn.href = data.download_url;
+        btn.style.display = 'block';
+      }
+
+      document.getElementById('reset-btn').style.display = 'block';
+    }
+
+    if (data.error) {
+      setStage(currentStage, 'error');
+      document.getElementById('reset-btn').style.display = 'block';
+    }
+  }
+
+  function startPipeline() {
+    const course = document.getElementById('course').value.trim();
+    const topic = document.getElementById('topic').value.trim();
+    if (!uploadedFile) { alert('Please upload a PDF first.'); return; }
+    if (!course || !topic) { alert('Please fill in course and topic.'); return; }
+
+    document.getElementById('upload-panel').style.display = 'none';
+    document.getElementById('progress-panel').style.display = 'block';
+    log('Pipeline started', 'l-accent');
+
+    const formData = new FormData();
+    formData.append('pdf', uploadedFile);
+    formData.append('course', course);
+    formData.append('topic', topic);
+
+    fetch('/run', { method: 'POST', body: formData })
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) { log(data.error, 'l-error'); return; }
+        const evtSource = new EventSource(`/progress/${data.job_id}`);
+        evtSource.onmessage = e => {
+          const parsed = JSON.parse(e.data);
+          handleEvent(parsed);
+          if (parsed.done) evtSource.close();
+        };
+        evtSource.onerror = () => { log('Connection lost', 'l-error'); evtSource.close(); };
+      })
+      .catch(err => log('Failed to start: ' + err, 'l-error'));
+  }
+
+  function resetForm() {
+    document.getElementById('upload-panel').style.display = 'block';
+    document.getElementById('progress-panel').style.display = 'none';
+    document.getElementById('log').innerHTML = '';
+    document.getElementById('stats-section').style.display = 'none';
+    document.getElementById('download-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('progress-bar').style.width = '0%';
+    document.getElementById('course').value = '';
+    document.getElementById('topic').value = '';
+    currentStage = 0;
+    for (let i = 1; i <= 6; i++) {
+      const row = document.getElementById(`stage-${i}`);
+      row.className = 'stage-row';
+      document.getElementById(`si-${i}`).innerHTML = `0${i}`;
+      document.getElementById(`ss-${i}`).textContent = 'waiting';
+    }
+    myDropzone.removeAllFiles();
+    uploadedFile = null;
+  }
+</script>
+</body>
+</html>
