@@ -38,7 +38,7 @@ def run_pipeline_threaded(job_id, pdf_path, course, topic, output_path):
         from transcribe import transcribe_images, PRIMARY_MODEL, FALLBACK_MODEL
         from format_notes import format_notes
         from cache import get_cached_transcription, save_transcription_to_cache
-        from connections import find_connections, inject_connections
+        from connections import find_connections, inject_connections, register_note_tags
         from obsidian_writer import write_to_obsidian
         from tracker import register_note
         from config import OBSIDIAN_VAULT_PATH, OUTPUT_DIR
@@ -86,19 +86,23 @@ def run_pipeline_threaded(job_id, pdf_path, course, topic, output_path):
         time.sleep(0.3)
 
         # --- Stage 4: Connections ---
-        stream_progress(job_id, "Scanning vault for connections...", stage=4)
-        connections = find_connections(formatted, OBSIDIAN_VAULT_PATH)
-        if connections:
-            formatted = inject_connections(formatted, connections)
-            stats["connections"] = len(connections)
-            stream_progress(job_id, f"Found {len(connections)} connection(s)", stage=4)
+        stream_progress(job_id, "Scanning tag index for connections...", stage=4)
+        wikilinks, new_tags, new_themes = find_connections(formatted, OBSIDIAN_VAULT_PATH, course=course, topic=topic)
+        if wikilinks:
+            formatted = inject_connections(formatted, wikilinks, new_tags, new_themes)
+            stats["connections"] = len(wikilinks)
+            stream_progress(job_id, f"Found {len(wikilinks)} connection(s) via tag overlap", stage=4)
         else:
-            stream_progress(job_id, "No connections found", stage=4)
+            stream_progress(job_id, "No connections yet — tags saved for future notes", stage=4)
         time.sleep(0.3)
 
         # --- Stage 5: Write to Obsidian + save download copy ---
         stream_progress(job_id, "Writing to Obsidian vault...", stage=5)
         note_path = write_to_obsidian(formatted, course, topic)
+
+        # Register tags in index after note is saved
+        if new_tags or new_themes:
+            register_note_tags(note_path, new_tags, new_themes, course, topic)
 
         # Also save to output_path for browser download
         with open(output_path, "w", encoding="utf-8") as f:
@@ -209,6 +213,163 @@ def download(job_id):
 
     return send_file(output_path, as_attachment=True, download_name="notes.md")
 
+
+
+
+@app.route("/review")
+def review():
+    """Returns all notes due for review as JSON"""
+    from tracker import get_due_notes
+    due = get_due_notes()
+    return jsonify(due)
+
+
+@app.route("/review/mark", methods=["POST"])
+def review_mark():
+    """Marks a note as reviewed and returns the updated entry"""
+    from tracker import mark_reviewed, load_tracker
+    data = request.get_json()
+    note_name = data.get("note_name", "").strip()
+    if not note_name:
+        return jsonify({"error": "note_name required"}), 400
+    mark_reviewed(note_name)
+    tracker = load_tracker()
+    entry = tracker.get(note_name, {})
+    return jsonify({
+        "success": True,
+        "note_name": note_name,
+        "next_review": entry.get("next_review"),
+        "review_stage": entry.get("review_stage"),
+        "last_reviewed": entry.get("last_reviewed")
+    })
+
+
+@app.route("/review/all")
+def review_all():
+    """Returns all tracked notes regardless of due date"""
+    from tracker import load_tracker
+    from datetime import date
+    tracker = load_tracker()
+    today = date.today()
+    result = []
+    for name, entry in tracker.items():
+        review_date = date.fromisoformat(entry["next_review"])
+        result.append({
+            "name": name,
+            "path": entry.get("path", ""),
+            "created": entry.get("created", ""),
+            "next_review": entry.get("next_review", ""),
+            "last_reviewed": entry.get("last_reviewed", ""),
+            "review_stage": entry.get("review_stage", 0),
+            "days_until": (review_date - today).days
+        })
+    result.sort(key=lambda x: x["days_until"])
+    return jsonify(result)
+
+
+
+@app.route("/vault")
+def vault():
+    """Scans Obsidian vault and returns structured course/note data"""
+    from config import OBSIDIAN_VAULT_PATH
+    from tracker import load_tracker
+    import os
+    from datetime import date
+
+    tracker = load_tracker()
+    today = date.today()
+    courses = {}
+
+    for root, dirs, files in os.walk(OBSIDIAN_VAULT_PATH):
+        dirs[:] = [d for d in dirs if not d.startswith(".")]
+        for file in files:
+            if not file.endswith(".md"):
+                continue
+
+            course = os.path.basename(root)
+            if course == os.path.basename(OBSIDIAN_VAULT_PATH):
+                course = "Uncategorized"
+
+            full_path = os.path.join(root, file)
+            modified = date.fromtimestamp(os.path.getmtime(full_path))
+            days_ago = (today - modified).days
+
+            topic = ""
+            tags = []
+            note_type = ""
+            questions = 0
+            connections = 0
+
+            try:
+                with open(full_path, "r", encoding="utf-8") as f:
+                    raw = f.read()
+
+                questions = raw.count("- [ ]")
+                connections = raw.count("[[")
+
+                if raw.startswith("---"):
+                    fm_end = raw.find("---", 3)
+                    if fm_end != -1:
+                        fm = raw[3:fm_end]
+                        for line in fm.splitlines():
+                            if line.startswith("topic:"):
+                                topic = line.replace("topic:", "").strip().strip('"')
+                            if line.startswith("tags:"):
+                                tags = line.replace("tags:", "").strip().strip("[]").split(",")
+                                tags = [t.strip() for t in tags]
+                            if line.startswith("type:"):
+                                note_type = line.replace("type:", "").strip().strip('"')
+            except Exception:
+                pass
+
+            note_key = os.path.splitext(file)[0]
+            tracker_entry = tracker.get(file, tracker.get(note_key, {}))
+            review_stage = tracker_entry.get("review_stage", None)
+            next_review = tracker_entry.get("next_review", None)
+
+            if next_review:
+                try:
+                    nr = date.fromisoformat(next_review)
+                    days_until_review = (nr - today).days
+                except Exception:
+                    days_until_review = None
+            else:
+                days_until_review = None
+
+            if course not in courses:
+                courses[course] = []
+
+            courses[course].append({
+                "name": note_key,
+                "topic": topic or note_key.replace("_", " "),
+                "modified": str(modified),
+                "days_ago": days_ago,
+                "questions": questions,
+                "connections": connections,
+                "tags": tags,
+                "type": note_type,
+                "review_stage": review_stage,
+                "next_review": next_review,
+                "days_until_review": days_until_review
+            })
+
+    # Sort notes within each course by most recently modified
+    for course in courses:
+        courses[course].sort(key=lambda x: x["modified"], reverse=True)
+
+    total_notes = sum(len(n) for n in courses.values())
+    total_questions = sum(note["questions"] for notes in courses.values() for note in notes)
+    total_connections = sum(note["connections"] for notes in courses.values() for note in notes)
+
+    return jsonify({
+        "courses": courses,
+        "stats": {
+            "total_notes": total_notes,
+            "total_courses": len(courses),
+            "total_questions": total_questions,
+            "total_connections": total_connections
+        }
+    })
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

@@ -1,0 +1,277 @@
+{
+  "intro": {
+    "tags": [
+      "lecture",
+      "BME3053"
+    ],
+    "themes": [],
+    "course": "BME3053",
+    "topic": "Problem Set 3.1",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro.md",
+    "date": "2026-05-28"
+  },
+  "intro10_2026-05-30": {
+    "tags": [
+      "lecture",
+      "MME530"
+    ],
+    "themes": [],
+    "course": "MME530",
+    "topic": "intro7",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro10_2026-05-30.md",
+    "date": "2026-05-30"
+  },
+  "intro11_2026-05-30": {
+    "tags": [
+      "lecture",
+      "BME3053",
+      "ProbSet8.1"
+    ],
+    "themes": [],
+    "course": "BME3053",
+    "topic": "ProbSet 8.1 - Essential Energy Concepts",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro11_2026-05-30.md",
+    "date": "2026-05-30"
+  },
+  "intro12_2026-05-30": {
+    "tags": [
+      "lecture",
+      "BME3053"
+    ],
+    "themes": [],
+    "course": "BME3053",
+    "topic": "intro12",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro12_2026-05-30.md",
+    "date": "2026-05-30"
+  },
+  "intro13_2026-05-30": {
+    "tags": [
+      "lecture",
+      "BME3053"
+    ],
+    "themes": [],
+    "course": "BME3053",
+    "topic": "intro13",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro13_2026-05-30.md",
+    "date": "2026-05-30"
+  },
+  "intro30_2026-05-31": {
+    "tags": [
+      "lecture",
+      "BME3053"
+    ],
+    "themes": [],
+    "course": "BME3053",
+    "topic": "ProbSet 9.2 - Conservation of Energy in Open Systems",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro30_2026-05-31.md",
+    "date": "2026-05-31"
+  },
+  "intro5_2026-05-28": {
+    "tags": [
+      "lecture",
+      "BME3053"
+    ],
+    "themes": [],
+    "course": "BME3053",
+    "topic": "intro5",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro5_2026-05-28.md",
+    "date": "2026-05-28"
+  },
+  "intro6_2026-05-28": {
+    "tags": [
+      "lecture",
+      "BME3053"
+    ],
+    "themes": [],
+    "course": "BME3053",
+    "topic": "intro6",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro6_2026-05-28.md",
+    "date": "2026-05-28"
+  },
+  "intro7_2026-05-28": {
+    "tags": [
+      "lecture",
+      "MME530"
+    ],
+    "themes": [],
+    "course": "MME530",
+    "topic": "intro7",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro7_2026-05-28.md",
+    "date": "2026-05-28"
+  },
+  "intro8_2026-05-28": {
+    "tags": [
+      "lecture",
+      "MME530"
+    ],
+    "themes": [],
+    "course": "MME530",
+    "topic": "intro7",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro8_2026-05-28.md",
+    "date": "2026-05-28"
+  },
+  "intro31_2026-05-31": {
+    "tags": [
+      "conservation-of-energy",
+      "open-systems",
+      "enthalpy",
+      "specific-enthalpy",
+      "heat-transfer",
+      "heat-loss",
+      "breathing-thermodynamics",
+      "air-properties",
+      "water-vapor",
+      "ideal-gas-assumption",
+      "steady-state",
+      "non-flow-work",
+      "potential-energy-change",
+      "kinetic-energy-change",
+      "specific-heat-capacity",
+      "temperature-change",
+      "hypothetical-path",
+      "phosphate-buffered-saline",
+      "pbs-solution",
+      "tissue-bathing",
+      "mixer-work",
+      "electric-heater",
+      "mass-accounting-equation",
+      "energy-accounting-equation",
+      "physiological-thermodynamics"
+    ],
+    "themes": [
+      "Energy conservation in open physiological systems",
+      "Enthalpy changes during respiration thermodynamics",
+      "Thermodynamic analysis of fluid heating systems",
+      "Assumptions and simplifications in biological thermodynamics",
+      "Mass and energy balance for open systems",
+      "Calculating heat transfer in physiological processes"
+    ],
+    "course": "BME3053",
+    "topic": "intro31",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro31_2026-05-31.md",
+    "date": "2026-05-31"
+  },
+  "intro32_2026-05-31": {
+    "tags": [
+      "conservation-of-energy",
+      "open-system",
+      "non-reacting-system",
+      "enthalpy",
+      "internal-energy",
+      "state-function",
+      "path-function",
+      "flow-work",
+      "specific-enthalpy",
+      "specific-internal-energy",
+      "specific-volume",
+      "heat-capacity",
+      "constant-pressure-heat-capacity",
+      "temperature-change",
+      "phase-change",
+      "sensible-heat",
+      "thermodynamic-definition",
+      "rate-equation",
+      "hypothetical-path",
+      "integration",
+      "polynomial-approximation",
+      "pulmonary-hysteresis",
+      "restrictive-lung-disease",
+      "volume-pressure-loop",
+      "faraday-constant"
+    ],
+    "themes": [
+      "Conservation of energy in open systems",
+      "Enthalpy definition and properties",
+      "State vs. path functions in thermodynamics",
+      "Heat capacity and enthalpy change",
+      "Enthalpy change through hypothetical paths",
+      "Pulmonary hysteresis and thermodynamic work"
+    ],
+    "course": "BME3053",
+    "topic": "intro32",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro32_2026-05-31.md",
+    "date": "2026-05-31"
+  },
+  "intro33_2026-05-31": {
+    "tags": [
+      "conservation-of-energy",
+      "open-systems",
+      "non-reacting-systems",
+      "enthalpy",
+      "internal-energy",
+      "state-function",
+      "path-function",
+      "heat-capacity",
+      "specific-enthalpy",
+      "flow-work",
+      "enthalpy-change-temperature",
+      "enthalpy-change-phase-transition",
+      "enthalpy-change-mixing",
+      "pressure-volume-work",
+      "temperature",
+      "pressure",
+      "phase-change",
+      "melting",
+      "vaporization",
+      "boltzmann-constant",
+      "faraday-constant",
+      "rc-circuit-analogy",
+      "thermodynamic-properties",
+      "energy-accounting",
+      "fluid-mechanics"
+    ],
+    "themes": [
+      "Enthalpy definition and properties",
+      "Distinguishing state and path functions",
+      "Calculating enthalpy changes with temperature",
+      "Role of heat capacity in enthalpy change",
+      "Enthalpy changes during phase transitions",
+      "Energy conservation in open non-reacting systems"
+    ],
+    "course": "BME3053",
+    "topic": "intro33",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro33_2026-05-31.md",
+    "date": "2026-05-31"
+  },
+  "intro34_2026-05-31": {
+    "tags": [
+      "enthalpy-change",
+      "specific-enthalpy",
+      "heat-of-vaporization",
+      "phase-transition",
+      "gas-phase",
+      "liquid-phase",
+      "thermodynamic-pathway",
+      "temperature-change",
+      "cooling",
+      "condensation",
+      "boiling-point",
+      "room-temperature",
+      "medical-applications",
+      "liquid-nitrogen",
+      "water-vaporization",
+      "sweating",
+      "body-cooling",
+      "latent-heat",
+      "heat-capacity",
+      "water",
+      "nitrogen",
+      "ideal-gas-law",
+      "energy-balance",
+      "specific-heat-capacity",
+      "calorimetry"
+    ],
+    "themes": [
+      "Enthalpy change during phase transitions",
+      "Thermodynamic pathways for state changes",
+      "Calculating enthalpy of vaporization",
+      "Energy balance in cooling processes",
+      "Heat capacity and temperature dependence",
+      "Biomedical applications of thermodynamic principles"
+    ],
+    "course": "BME3053",
+    "topic": "intro34",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro34_2026-05-31.md",
+    "date": "2026-05-31"
+  }
+}

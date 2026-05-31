@@ -10,13 +10,12 @@ from transcribe import transcribe_images
 from format_notes import format_notes
 from obsidian_writer import write_to_obsidian
 from cache import get_cached_transcription, save_transcription_to_cache
-from connections import find_connections, inject_connections
+from connections import find_connections, inject_connections, register_note_tags
 from tracker import register_note
 from config import OUTPUT_DIR, OBSIDIAN_VAULT_PATH
 
 
 def safe_cleanup(folder):
-    """Windows-safe cleanup"""
     if not os.path.exists(folder):
         return
     for root, dirs, files in os.walk(folder, topdown=False):
@@ -38,19 +37,15 @@ def safe_cleanup(folder):
 
 
 def run_pipeline(pdf_path, course, topic):
-    print("\n🚀 Starting pipeline...\n")
+    print("\n Starting pipeline...\n")
 
-    # -------------------------
-    # Stage 1 — PDF → Images
-    # -------------------------
-    print("📄 Stage 1: PDF → Images")
+    # ── Stage 1 — PDF → Images ──────────────────────────
+    print("Stage 1: PDF → Images")
     images = pdf_to_images(pdf_path)
     time.sleep(0.5)
 
-    # -------------------------
-    # Stage 2 — Transcription (with cache)
-    # -------------------------
-    print("\n🤖 Stage 2: Transcription")
+    # ── Stage 2 — Transcription ──────────────────────────
+    print("\nStage 2: Transcription")
     transcriptions = get_cached_transcription(pdf_path)
 
     if transcriptions is None:
@@ -60,51 +55,48 @@ def run_pipeline(pdf_path, course, topic):
             max_retries=5
         )
         save_transcription_to_cache(pdf_path, transcriptions)
-
-        total_tokens = sum(
-            u.get("total_tokens", 0) or 0 for u in usage_log
-        )
-        print(f"  📊 Tokens used: {total_tokens}")
+        total_tokens = sum(u.get("total_tokens", 0) or 0 for u in usage_log)
+        print(f"  Tokens used: {total_tokens}")
     else:
-        print("  ⚡ Using cached transcription — no API call made")
+        print("  Using cached transcription — no API call made")
 
-    # -------------------------
-    # Stage 3 — Formatting
-    # -------------------------
-    print("\n📝 Stage 3: Formatting")
+    # ── Stage 3 — Formatting ─────────────────────────────
+    print("\nStage 3: Formatting")
     formatted = format_notes(transcriptions, course, topic)
 
-    # -------------------------
-    # Stage 4 — Connections
-    # -------------------------
-    print("\n🔗 Stage 4: Finding connections")
-    connections = find_connections(formatted, OBSIDIAN_VAULT_PATH)
+    # ── Stage 4 — Connections ────────────────────────────
+    print("\nStage 4: Finding connections")
+    wikilinks, new_tags, new_themes = find_connections(
+        formatted,
+        OBSIDIAN_VAULT_PATH,
+        course=course,
+        topic=topic
+    )
 
-    if connections:
-        print(f"  Found {len(connections)} connections: {connections}")
-        formatted = inject_connections(formatted, connections)
+    if wikilinks:
+        print(f"  Injecting {len(wikilinks)} connection(s)")
+        formatted = inject_connections(formatted, wikilinks, new_tags, new_themes)
     else:
-        print("  No connections found")
+        print("  No connections injected")
 
-    # -------------------------
-    # Stage 5 — Write to Obsidian
-    # -------------------------
-    print("\n💾 Stage 5: Writing to Obsidian")
+    # ── Stage 5 — Write to Obsidian ──────────────────────
+    print("\nStage 5: Writing to Obsidian")
     note_path = write_to_obsidian(formatted, course, topic)
 
-    # -------------------------
-    # Stage 6 — Register in Tracker
-    # -------------------------
-    print("\n📅 Stage 6: Registering in spaced repetition tracker")
+    # ── Stage 5b — Register tags in index ────────────────
+    if new_tags or new_themes:
+        register_note_tags(note_path, new_tags, new_themes, course, topic)
+
+    # ── Stage 6 — Spaced Rep Tracker ─────────────────────
+    print("\nStage 6: Registering in spaced repetition tracker")
     register_note(note_path)
 
-    # -------------------------
-    # Cleanup
-    # -------------------------
-    print("\n🧹 Cleaning up temp files...")
+    # ── Cleanup ───────────────────────────────────────────
+    print("\nCleaning up temp files...")
     safe_cleanup(OUTPUT_DIR)
 
-    print("\n✅ Pipeline complete!")
+    print("\nPipeline complete!")
+
 
 if __name__ == "__main__":
     import sys
