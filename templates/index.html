@@ -221,6 +221,42 @@
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #3a3530; border-radius: 2px; }
+
+    /* Summary panel in Vault tab */
+.summary-bar { position: sticky; bottom: 0; background: var(--surface); border-top: 1.5px solid var(--rule); padding: 1rem 1.25rem; display: none; align-items: center; gap: 1rem; border-radius: 0 0 10px 10px; margin-top: -1px; }
+.summary-bar.visible { display: flex; }
+.summary-bar-info { flex: 1; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--ink2); }
+.summary-bar-info strong { color: var(--ink); }
+.btn-summarize { background: var(--punch); color: #fff; border: none; border-radius: 6px; padding: 0.55rem 1.1rem; font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
+.btn-summarize:hover { opacity: 0.88; }
+.btn-summarize:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-clear-sel { background: transparent; border: 1.5px solid var(--rule); color: var(--ink2); border-radius: 6px; padding: 0.5rem 0.8rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; cursor: pointer; transition: all 0.15s; }
+.btn-clear-sel:hover { border-color: var(--ink); color: var(--ink); }
+ 
+/* Checkbox column in note rows */
+.note-row-v { grid-template-columns: 20px 1fr 90px 70px 70px 80px; }
+.note-row-v.header-row { grid-template-columns: 20px 1fr 90px 70px 70px 80px; }
+.note-check { width: 16px; height: 16px; accent-color: var(--punch); cursor: pointer; }
+.note-row-v:hover { background: #faf8f5; cursor: pointer; }
+.note-row-v.selected { background: var(--punch-light); }
+ 
+/* Summary modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: flex; align-items: center; justify-content: center; }
+.modal-overlay.hidden { display: none; }
+.modal-box { background: var(--surface); border-radius: 12px; padding: 2rem; width: 520px; max-width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.4rem; }
+.modal-sub { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--ink3); margin-bottom: 1.5rem; }
+.modal-field { margin-bottom: 1rem; }
+.modal-field label { display: block; font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); margin-bottom: 0.4rem; }
+.modal-field input { width: 100%; background: var(--bg); border: 1.5px solid var(--rule); border-radius: 8px; padding: 0.65rem 0.9rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--ink); outline: none; transition: border-color 0.2s; }
+.modal-field input:focus { border-color: var(--punch); }
+.modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+.modal-confirm { flex: 1; background: var(--ink); color: #f5f2ed; border: none; border-radius: 8px; padding: 0.8rem; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: opacity 0.15s; }
+.modal-confirm:hover { opacity: 0.85; }
+.modal-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+.modal-cancel { background: transparent; border: 1.5px solid var(--rule); color: var(--ink2); border-radius: 8px; padding: 0.8rem 1.2rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; cursor: pointer; transition: all 0.15s; }
+.modal-cancel:hover { border-color: var(--ink); color: var(--ink); }
+.summary-result { background: var(--bg); border-radius: 8px; padding: 1rem; margin-top: 1rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--ink2); line-height: 1.7; max-height: 160px; overflow-y: auto; display: none; }
   </style>
 </head>
 <body>
@@ -271,7 +307,7 @@
 
     <div class="sidebar-footer">
       GEMINI_API_KEY ✓<br>
-      gemini-2.5-flash<br>
+      gemini-3.5-flash<br>
       localhost:5000
     </div>
   </aside>
@@ -428,6 +464,31 @@
       </div>
     </div>
 
+    <!-- Summary modal -->
+  <div class="modal-overlay hidden" id="summary-modal">
+    <div class="modal-box">
+      <div class="modal-title">Generate Summary Note</div>
+      <div class="modal-sub" id="modal-sub">Synthesizing <span id="modal-note-count">0</span> notes</div>
+ 
+      <div class="modal-field">
+        <label>Summary Title</label>
+        <input type="text" id="summary-title" placeholder="e.g. Membrane Potential Synthesis"/>
+      </div>
+      <div class="modal-field">
+        <label>Course</label>
+        <input type="text" id="summary-course" placeholder="e.g. BME3503"/>
+      </div>
+ 
+      <div class="summary-result" id="summary-result"></div>
+ 
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeSummaryModal()">Cancel</button>
+        <button class="modal-confirm" id="modal-confirm-btn" onclick="submitSummary()">
+          <i class="fa fa-magic"></i> Generate
+        </button>
+      </div>
+    </div>
+  </div>
   </main>
 </div>
 
@@ -680,44 +741,42 @@
 
   // ── Vault ──
   let vaultData = null;
-
+  let selectedNotes = new Map(); // key → { path, course }
+ 
   function loadVault() {
     fetch('/vault')
       .then(r => r.json())
-      .then(data => {
-        vaultData = data;
-        renderVault(data);
-      })
+      .then(data => { vaultData = data; renderVault(data); })
       .catch(() => {
         document.getElementById('vault-courses').innerHTML = '<div class="empty-state"><i class="fa fa-exclamation-triangle"></i>Could not load vault data.</div>';
       });
   }
-
+ 
   function renderVault(data) {
     const s = data.stats;
     document.getElementById('vstat-notes').textContent = s.total_notes;
     document.getElementById('vstat-courses').textContent = s.total_courses;
     document.getElementById('vstat-questions').textContent = s.total_questions;
     document.getElementById('vstat-connections').textContent = s.total_connections;
-
+ 
     const container = document.getElementById('vault-courses');
     container.innerHTML = '';
-
+ 
     if (Object.keys(data.courses).length === 0) {
       container.innerHTML = '<div class="empty-state"><i class="fa fa-folder-open"></i>No notes found in vault.</div>';
       return;
     }
-
+ 
     Object.entries(data.courses).sort().forEach(([course, notes]) => {
       container.appendChild(buildCourseBlock(course, notes));
     });
   }
-
+ 
   function buildCourseBlock(course, notes) {
     const block = document.createElement('div');
     block.className = 'course-block';
     block.dataset.course = course;
-
+ 
     const header = document.createElement('div');
     header.className = 'course-header';
     header.innerHTML = `
@@ -727,14 +786,14 @@
       <div class="section-rule"></div>
       <i class="fa fa-chevron-down course-toggle" id="toggle-${course}"></i>
     `;
-
+ 
     const table = document.createElement('div');
     table.className = 'note-table';
     table.id = `table-${course}`;
-
-    // Header row
+ 
     table.innerHTML = `
       <div class="note-row-v header-row">
+        <div></div>
         <div class="col-header">Topic</div>
         <div class="col-header">Modified</div>
         <div class="col-header">Type</div>
@@ -742,69 +801,203 @@
         <div class="col-header">Stage</div>
       </div>
     `;
-
+ 
     notes.forEach(note => {
       const row = document.createElement('div');
       row.className = 'note-row-v';
       row.dataset.topic = (note.topic || '').toLowerCase();
-      row.dataset.name = (note.name || '').toLowerCase();
-
-      const modStr = note.days_ago === 0 ? 'today' : note.days_ago === 1 ? 'yesterday' : `${note.days_ago}d ago`;
-
-      const typeMap = { notes: 'type-notes', problems: 'type-problems', mixed: 'type-mixed' };
+      row.dataset.name  = (note.name || '').toLowerCase();
+      row.dataset.key   = note.name;
+      row.dataset.path = String(note.path || '');
+      row.dataset.course = course;
+ 
+      const modStr    = note.days_ago === 0 ? 'today' : note.days_ago === 1 ? 'yesterday' : `${note.days_ago}d ago`;
+      const typeMap   = { notes: 'type-notes', problems: 'type-problems', mixed: 'type-mixed' };
       const typeClass = typeMap[note.type] || 'type-unknown';
       const typeLabel = note.type || '—';
-
+ 
       let itemsHtml = '<span class="badge-none">—</span>';
-      if (note.questions > 0 && note.connections > 0) {
-        itemsHtml = `<span class="note-badge badge-q">❓${note.questions}</span>`;
-      } else if (note.questions > 0) {
-        itemsHtml = `<span class="note-badge badge-q">❓${note.questions}</span>`;
-      } else if (note.connections > 0) {
-        itemsHtml = `<span class="note-badge badge-c">🔗${note.connections}</span>`;
-      }
-
-      // Stage pips
+      if (note.questions > 0) itemsHtml = `<span class="note-badge badge-q">❓${note.questions}</span>`;
+      else if (note.connections > 0) itemsHtml = `<span class="note-badge badge-c">🔗${note.connections}</span>`;
+ 
       let pipsHtml = '<span class="badge-none">—</span>';
       if (note.review_stage !== null && note.review_stage !== undefined) {
         const stage = note.review_stage + 1;
         const isComplete = stage >= 6;
         pipsHtml = '<div class="stage-pip-row">';
         for (let i = 0; i < 6; i++) {
-          const filled = i < stage;
-          pipsHtml += `<div class="stage-pip ${filled ? (isComplete ? 'complete' : 'filled') : ''}"></div>`;
+          pipsHtml += `<div class="stage-pip ${i < stage ? (isComplete ? 'complete' : 'filled') : ''}"></div>`;
         }
         pipsHtml += '</div>';
       }
-
+ 
+      const isSelected = selectedNotes.has(note.name);
+      if (isSelected) row.classList.add('selected');
+ 
       row.innerHTML = `
+        <input type="checkbox" class="note-check" ${isSelected ? 'checked' : ''}/>
         <div class="note-topic" title="${note.name}">${note.topic}</div>
         <div class="note-modified">${modStr}</div>
         <div><span class="type-chip ${typeClass}">${typeLabel}</span></div>
         <div>${itemsHtml}</div>
         <div>${pipsHtml}</div>
       `;
+
+      const cb = row.querySelector('.note-check');
+
+      cb.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleNoteSelect(e, note.name, note.path || '', course, cb.checked);
+      });
+ 
+      // Click row to toggle (but not when clicking the checkbox directly)
+      row.addEventListener('click', (e) => {
+        if (e.target.classList.contains('note-check')) return;
+        const cb = row.querySelector('.note-check');
+        cb.checked = !cb.checked;
+        toggleNoteSelect({ stopPropagation: ()=>{} }, note.name, note.path || '', course, cb.checked);
+      });
+ 
       table.appendChild(row);
     });
-
+ 
+    // Sticky summary bar at bottom of each course table
+    const summaryBar = document.createElement('div');
+    summaryBar.className = 'summary-bar';
+    summaryBar.id = `sbar-${course}`;
+    summaryBar.innerHTML = `
+      <div class="summary-bar-info"><strong id="sbar-count-${course}">0</strong> notes selected from ${course}</div>
+      <button class="btn-clear-sel" onclick="clearCourseSelection('${course}')">Clear</button>
+      <button class="btn-summarize" onclick="openSummaryModal('${course}')"><i class="fa fa-magic"></i> Summarize</button>
+    `;
+    table.appendChild(summaryBar);
+ 
     header.addEventListener('click', () => {
       const toggle = document.getElementById(`toggle-${course}`);
       const isCollapsed = table.style.display === 'none';
       table.style.display = isCollapsed ? 'block' : 'none';
       toggle.classList.toggle('collapsed', !isCollapsed);
     });
-
+ 
     block.appendChild(header);
     block.appendChild(table);
     return block;
   }
+ 
+  function toggleNoteSelect(e, key, path, course, forcedState) {
+    e.stopPropagation && e.stopPropagation();
+    const isNowSelected = forcedState !== undefined ? forcedState : !selectedNotes.has(key);
+ 
+    if (isNowSelected) {
+      selectedNotes.set(key, { path, course });
+    } else {
+      selectedNotes.delete(key);
+    }
+ 
+    console.log("SELECTED PATH:", path);
 
+    // Update row highlight
+    const rows = document.querySelectorAll(`.note-row-v[data-key="${key}"]`);
+    rows.forEach(r => r.classList.toggle('selected', isNowSelected));
+ 
+    updateSummaryBar(course);
+  }
+ 
+  function updateSummaryBar(course) {
+    const courseSelected = [...selectedNotes.values()].filter(v => v.course === course);
+    const bar   = document.getElementById(`sbar-${course}`);
+    const count = document.getElementById(`sbar-count-${course}`);
+    if (!bar) return;
+    if (courseSelected.length > 0) {
+      bar.classList.add('visible');
+      count.textContent = courseSelected.length;
+    } else {
+      bar.classList.remove('visible');
+    }
+  }
+ 
+  function clearCourseSelection(course) {
+    [...selectedNotes.entries()].forEach(([key, val]) => {
+      if (val.course === course) {
+        selectedNotes.delete(key);
+        document.querySelectorAll(`.note-row-v[data-key="${key}"]`).forEach(r => {
+          r.classList.remove('selected');
+          const cb = r.querySelector('.note-check');
+          if (cb) cb.checked = false;
+        });
+      }
+    });
+    updateSummaryBar(course);
+  }
+ 
+  function openSummaryModal(course) {
+    const courseSelected = [...selectedNotes.values()].filter(v => v.course === course);
+    if (courseSelected.length === 0) return;
+ 
+    document.getElementById('modal-note-count').textContent = courseSelected.length;
+    document.getElementById('summary-course').value = course;
+    document.getElementById('summary-title').value = '';
+    document.getElementById('summary-result').style.display = 'none';
+    document.getElementById('summary-result').textContent = '';
+    document.getElementById('modal-confirm-btn').disabled = false;
+    document.getElementById('modal-confirm-btn').innerHTML = '<i class="fa fa-magic"></i> Generate';
+    document.getElementById('summary-modal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('summary-title').focus(), 100);
+  }
+ 
+  function closeSummaryModal() {
+    document.getElementById('summary-modal').classList.add('hidden');
+  }
+ 
+  function submitSummary() {
+    const title  = document.getElementById('summary-title').value.trim();
+    const course = document.getElementById('summary-course').value.trim();
+    if (!title) { document.getElementById('summary-title').focus(); return; }
+ 
+    const paths = [...selectedNotes.values()]
+      .filter(v => v.course === course)
+      .map(v => v.path)
+      .filter(Boolean);
+ 
+    if (paths.length === 0) { closeSummaryModal(); return; }
+ 
+    const btn = document.getElementById('modal-confirm-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-circle-notch spin"></i> Generating...';
+ 
+    fetch('/summary/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ note_paths: paths, course, title })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-magic"></i> Generate';
+        document.getElementById('summary-result').style.display = 'block';
+        document.getElementById('summary-result').textContent = '❌ ' + data.error;
+        return;
+      }
+      btn.innerHTML = '<i class="fa fa-check"></i> Done';
+      const result = document.getElementById('summary-result');
+      result.style.display = 'block';
+      result.textContent = `✅ Saved to Obsidian: ${data.filename}\n\nPreview:\n${data.preview}`;
+      clearCourseSelection(course);
+      setTimeout(() => { closeSummaryModal(); loadVault(); }, 3000);
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa fa-magic"></i> Generate';
+      document.getElementById('summary-result').style.display = 'block';
+      document.getElementById('summary-result').textContent = '❌ Request failed: ' + err;
+    });
+  }
+ 
   function filterVault(query) {
     if (!vaultData) return;
     const q = query.toLowerCase().trim();
-
     if (!q) { renderVault(vaultData); return; }
-
     const filtered = { courses: {}, stats: vaultData.stats };
     Object.entries(vaultData.courses).forEach(([course, notes]) => {
       const match = notes.filter(n =>
@@ -817,7 +1010,11 @@
     });
     renderVault(filtered);
   }
-
+ 
+  // Close modal on overlay click
+  document.getElementById('summary-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeSummaryModal();
+  });
   // Init
   loadDueBadge();
 </script>

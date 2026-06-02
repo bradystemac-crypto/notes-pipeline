@@ -41,7 +41,7 @@ def run_pipeline(pdf_path, course, topic):
 
     # ── Stage 1 — PDF → Images ──────────────────────────
     print("Stage 1: PDF → Images")
-    images = pdf_to_images(pdf_path)
+    images, diagram_map = pdf_to_images(pdf_path)
     time.sleep(0.5)
 
     # ── Stage 2 — Transcription ──────────────────────────
@@ -81,7 +81,7 @@ def run_pipeline(pdf_path, course, topic):
 
     # ── Stage 5 — Write to Obsidian ──────────────────────
     print("\nStage 5: Writing to Obsidian")
-    note_path = write_to_obsidian(formatted, course, topic)
+    note_path = write_to_obsidian(formatted, course, topic, diagram_map=diagram_map)
 
     # ── Stage 5b — Register tags in index ────────────────
     if new_tags or new_themes:

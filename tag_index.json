@@ -273,5 +273,150 @@
     "topic": "intro34",
     "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro34_2026-05-31.md",
     "date": "2026-05-31"
+  },
+  "SUMMARY_18_summary_25_26_2026-06-01": {
+    "tags": [
+      "summary",
+      "synthesis"
+    ],
+    "themes": [],
+    "course": "BME3053",
+    "topic": "SUMMARY 18 summary 25 26 2026-06-01",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\SUMMARY_18_summary_25_26_2026-06-01.md",
+    "date": "2026-06-01"
+  },
+  "intro37_2026-06-01": {
+    "tags": [
+      "specific-enthalpy",
+      "phase-transition",
+      "heat-of-vaporization",
+      "enthalpy-change",
+      "thermodynamic-pathway",
+      "cooling-process",
+      "liquid-nitrogen",
+      "gaseous-nitrogen",
+      "medical-applications",
+      "sweating-mechanism",
+      "body-temperature-regulation",
+      "latent-heat-of-vaporization",
+      "water-vaporization",
+      "heat-capacity-values",
+      "constant-pressure-process",
+      "ideal-gas-approximation",
+      "specific-heat-capacity",
+      "integrals",
+      "temperature-dependence",
+      "molten-to-gas",
+      "liquid-to-vapor",
+      "energy-balance",
+      "biomedical-engineering",
+      "thermodynamics",
+      "chemical-engineering"
+    ],
+    "themes": [
+      "Enthalpy change calculation for phase transitions",
+      "Thermodynamic pathway analysis for cooling",
+      "Heat of vaporization in biological cooling",
+      "Specific heat capacity integration for enthalpy",
+      "Energy balance in physiological temperature regulation",
+      "Enthalpy calculations involving liquid and gas states"
+    ],
+    "course": "BME3053",
+    "topic": "intro37",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro37_2026-06-01.md",
+    "date": "2026-06-01"
+  },
+  "SUMMARY_20_summary_25_26_2026-06-01": {
+    "tags": [
+      "summary",
+      "synthesis"
+    ],
+    "themes": [],
+    "course": "BME3053",
+    "topic": "SUMMARY 20 summary 25 26 2026-06-01",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\SUMMARY_20_summary_25_26_2026-06-01.md",
+    "date": "2026-06-01"
+  },
+  "intro40_2026-06-02": {
+    "tags": [
+      "conservation-of-energy",
+      "closed-system-thermodynamics",
+      "internal-energy-change",
+      "autoclave-sterilization",
+      "heat-transfer-rate",
+      "convection-heat-transfer",
+      "heat-transfer-coefficient",
+      "surface-area-heat-transfer",
+      "temperature-difference",
+      "non-flow-work",
+      "constant-volume-process",
+      "constant-pressure-process",
+      "piston-cylinder-work",
+      "pressure-volume-work",
+      "ideal-gas-law",
+      "joule-unit",
+      "atmosphere-liter-unit",
+      "energy-unit-conversion",
+      "biomedical-research-facility",
+      "medical-gas-synthesis",
+      "safety-engineering",
+      "volume-capacity",
+      "thermodynamic-state",
+      "heat-gain-loss",
+      "energy-conservation-equation"
+    ],
+    "themes": [
+      "Conservation of energy in closed systems",
+      "Internal energy change calculation in thermodynamics",
+      "Heat transfer and work in thermodynamic processes",
+      "Pressure-volume work for constant pressure",
+      "Thermodynamic system safety analysis",
+      "Energy unit conversions for thermodynamic calculations"
+    ],
+    "course": "BME3053",
+    "topic": "intro40",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro40_2026-06-02.md",
+    "date": "2026-06-02"
+  },
+  "intro41_2026-06-02": {
+    "tags": [
+      "conservation-of-mass",
+      "steady-state-systems",
+      "non-reacting-systems",
+      "multiple-inlets",
+      "multiple-outlets",
+      "cylindrical-vessels",
+      "venous-capillary",
+      "venule",
+      "blood-flow-velocity",
+      "blood-density",
+      "mass-flow-rate",
+      "control-volume-analysis",
+      "open-system",
+      "mass-conservation-equation",
+      "volume-flow-rate",
+      "radius",
+      "diameter",
+      "coronary-artery",
+      "blood-vessel-graft",
+      "coronary-plaque",
+      "coronary-ischemia",
+      "surgical-treatment",
+      "cardiovascular-engineering",
+      "system-boundary",
+      "normal-blood-flow"
+    ],
+    "themes": [
+      "Mass conservation in steady-state fluid systems",
+      "Calculating blood flow velocity in vessels",
+      "Mass flow rate of blood in venules",
+      "Blood flow obstruction due to coronary plaque",
+      "Design considerations for synthetic vascular grafts",
+      "Steady-state fluid dynamics in biological systems"
+    ],
+    "course": "BME3053",
+    "topic": "intro41",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro41_2026-06-02.md",
+    "date": "2026-06-02"
   }
 }

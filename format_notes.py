@@ -169,6 +169,32 @@ GLOBAL RULES — apply to all templates:
 - Preserve Step ⒶⒷⒸ markers for circled letters exactly where they appear.
 - Every [IMAGE: ...] from the transcription must appear somewhere in the output — either inline in a problem, inline in notes, or in the Diagrams section. Never drop an image.
 - Return only raw markdown. Do not wrap the output in a code block or backticks of any kind.
+
+------------------------------------------------------------
+1. YAML FRONTMATTER (FIRST SECTION)
+------------------------------------------------------------
+
+Must be the very first content in the response.
+Must NOT use code fences or backticks.
+
+Format:
+
+---
+tags: [...]
+date: YYYY-MM-DD
+course: ...
+topic: "..."
+type: ...
+---
+
+YAML RULES:
+- Only allowed keys: tags, date, course, topic, type
+- tags must be a flat list only (e.g. [lecture, BME3053])
+- topic must be a quoted string
+- No additional fields allowed
+- No markdown inside YAML
+- No wiki-links [[...]] anywhere
+
 """
 
 def format_notes(transcriptions, course, topic):

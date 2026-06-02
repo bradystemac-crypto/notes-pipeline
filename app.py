@@ -7,8 +7,10 @@ import time
 import queue
 import threading
 import tempfile
-from datetime import datetime
+from datetime import date, datetime
 from flask import Flask, request, jsonify, send_file, Response, render_template
+from matplotlib.pylab import rint
+from config import OBSIDIAN_VAULT_PATH
 
 app = Flask(__name__)
 
@@ -54,7 +56,7 @@ def run_pipeline_threaded(job_id, pdf_path, course, topic, output_path):
 
         # --- Stage 1: PDF to Images ---
         stream_progress(job_id, "Converting PDF to images...", stage=1)
-        images = pdf_to_images(pdf_path)
+        images, diagram_map = pdf_to_images(pdf_path)
         stats["pages"] = len(images)
         stream_progress(job_id, f"Converted {len(images)} pages", stage=1)
         time.sleep(0.3)
@@ -98,7 +100,7 @@ def run_pipeline_threaded(job_id, pdf_path, course, topic, output_path):
 
         # --- Stage 5: Write to Obsidian + save download copy ---
         stream_progress(job_id, "Writing to Obsidian vault...", stage=5)
-        note_path = write_to_obsidian(formatted, course, topic)
+        note_path = write_to_obsidian(formatted, course, topic, diagram_map=diagram_map)
 
         # Register tags in index after note is saved
         if new_tags or new_themes:
@@ -276,6 +278,7 @@ def vault():
     import os
     from datetime import date
 
+
     tracker = load_tracker()
     today = date.today()
     courses = {}
@@ -291,6 +294,9 @@ def vault():
                 course = "Uncategorized"
 
             full_path = os.path.join(root, file)
+            full_path = os.path.normpath(os.path.abspath(full_path))  # normalize FIRST
+            
+            # ✅ MUST define modified BEFORE using it
             modified = date.fromtimestamp(os.path.getmtime(full_path))
             days_ago = (today - modified).days
 
@@ -341,6 +347,7 @@ def vault():
 
             courses[course].append({
                 "name": note_key,
+                "path": full_path,  # ✅ REQUIRED FIX
                 "topic": topic or note_key.replace("_", " "),
                 "modified": str(modified),
                 "days_ago": days_ago,
@@ -357,9 +364,11 @@ def vault():
     for course in courses:
         courses[course].sort(key=lambda x: x["modified"], reverse=True)
 
+
     total_notes = sum(len(n) for n in courses.values())
     total_questions = sum(note["questions"] for notes in courses.values() for note in notes)
     total_connections = sum(note["connections"] for notes in courses.values() for note in notes)
+
 
     return jsonify({
         "courses": courses,
@@ -370,6 +379,51 @@ def vault():
             "total_connections": total_connections
         }
     })
+
+@app.route("/summary/generate", methods=["POST"])
+def summary_generate():
+    """
+    Receives a list of note paths + metadata, runs summarizer,
+    returns the summary content and path as JSON.
+
+    Expected JSON body:
+    {
+        "note_paths": ["/abs/path/to/note1.md", ...],
+        "course":     "BME3503",
+        "title":      "Membrane Potential Synthesis"
+    }
+    """
+    from summarizer import generate_summary
+
+    data       = request.get_json()
+    note_paths = data.get("note_paths", [])
+    course     = data.get("course", "").strip()
+    title      = data.get("title", "").strip()
+
+    print("\n=== NOTE PATHS RECEIVED BY FLASK ===")
+    for p in note_paths:
+        print(repr(p))
+
+    if not note_paths:
+        return jsonify({"error": "No notes selected."}), 400
+    if not course:
+        return jsonify({"error": "Course is required."}), 400
+    if not title:
+        return jsonify({"error": "Summary title is required."}), 400
+
+    try:
+        result = generate_summary(note_paths, course, title)
+        return jsonify({
+            "success":  True,
+            "path":     result["path"],
+            "filename": result["filename"],
+            "preview":  result["content"][:600] + ("..." if len(result["content"]) > 600 else "")
+        })
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

@@ -5,11 +5,9 @@ import json
 from datetime import date
 from google import genai
 from config import OBSIDIAN_VAULT_PATH
+from model_router import get_model, log_usage
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
-TAGGER_MODEL  = "gemini-2.5-flash-lite"
-MATCHER_MODEL = "gemini-2.5-flash-lite"
 
 TAG_INDEX_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tag_index.json")
 
@@ -43,7 +41,6 @@ def bootstrap_vault_index(vault_path):
     Scans the vault for any .md files that have themes/tags
     already written in their Connections section.
     Adds them to the index if not already present.
-    This means hand-written Obsidian notes get indexed too.
     """
     index = load_index()
     added = 0
@@ -56,7 +53,7 @@ def bootstrap_vault_index(vault_path):
 
             note_key = os.path.splitext(file)[0]
             if note_key in index:
-                continue  # already indexed
+                continue
 
             full_path = os.path.join(root, file)
             try:
@@ -65,7 +62,6 @@ def bootstrap_vault_index(vault_path):
             except Exception:
                 continue
 
-            # Extract tags from frontmatter
             tags = []
             topic = ""
             course = ""
@@ -82,7 +78,6 @@ def bootstrap_vault_index(vault_path):
                             raw_tags = line.replace("tags:", "").strip().strip("[]")
                             tags = [t.strip() for t in raw_tags.split(",") if t.strip()]
 
-            # Extract themes from Connections section
             themes = []
             if "## Themes" in raw:
                 start = raw.find("## Themes") + len("## Themes")
@@ -93,7 +88,6 @@ def bootstrap_vault_index(vault_path):
                     if line:
                         themes.append(line)
 
-            # Only index if we got something meaningful
             if tags or themes:
                 index[note_key] = {
                     "tags": tags,
@@ -113,18 +107,17 @@ def bootstrap_vault_index(vault_path):
 
 
 # ─────────────────────────────────────────────────────────────
-# Layer 1 — Generate tags + themes from note content
+# Layer 1 — Generate tags + themes (Claude)
 # ─────────────────────────────────────────────────────────────
 
 def generate_tags_and_themes(formatted_note, course, topic):
     """
-    Sends the formatted note to Gemini.
+    Sends the formatted note to Claude (via model_router).
     Returns (tags, themes) — both lists of strings.
-    Tags are specific hyphenated concepts.
-    Themes are named conceptual ideas written as phrases.
     """
-    prompt = f"""
-You are a biomedical engineering knowledge graph assistant for a University of Florida student.
+    model = get_model("tagging")
+
+    prompt = f"""You are a biomedical engineering knowledge graph assistant for a University of Florida student.
 
 Analyze the note content below and return a JSON object with two fields:
 
@@ -140,7 +133,6 @@ Analyze the note content below and return a JSON object with two fields:
    - Written as named concepts, not sentences: "Nernst equilibrium potential derivation",
      "Membrane capacitance as RC circuit analogy", "Ion selectivity and electrochemical driving force"
    - These should be specific enough that another note on the same concept would share them
-   - Think: what would you search for in a textbook index?
 
 Return ONLY a valid JSON object. No preamble, no backticks, no explanation.
 
@@ -154,15 +146,18 @@ Course: {course}
 Topic: {topic}
 
 --- NOTE CONTENT ---
-{formatted_note[:5000]}
-"""
+{formatted_note[:5000]}"""
 
     try:
         response = client.models.generate_content(
-            model=TAGGER_MODEL,
+            model=model,
             contents=[prompt]
         )
         raw = response.text.strip()
+
+        total_tokens = response.usage_metadata.total_token_count
+        log_usage(model, total_tokens)
+
         if raw.startswith("```"):
             raw = raw.split("```")[1]
             if raw.startswith("json"):
@@ -170,27 +165,28 @@ Topic: {topic}
         result = json.loads(raw.strip())
         tags   = [t.lower().replace(" ", "-") for t in result.get("tags", []) if isinstance(t, str)]
         themes = [t.strip() for t in result.get("themes", []) if isinstance(t, str)]
-        print(f"  Generated {len(tags)} tags, {len(themes)} themes")
+        print(f"  Generated {len(tags)} tags, {len(themes)} themes  [{model}, {total_tokens} tokens]")
         return tags, themes
+
     except Exception as e:
         print(f"  Tag/theme generation failed: {e}")
         return [], []
 
 
 # ─────────────────────────────────────────────────────────────
-# Layer 2 — Semantic matching via Gemini
+# Layer 2 — Semantic matching (Claude)
 # ─────────────────────────────────────────────────────────────
 
 def semantic_match(new_themes, new_tags, index):
     """
-    Sends the new note's themes + all indexed notes' themes to Gemini.
-    Gemini judges genuine conceptual relatedness — not just string overlap.
+    Sends the new note's themes + all indexed notes' themes to Claude.
     Returns list of note_keys that are genuinely related.
     """
     if not index:
         return []
 
-    # Build candidate list — include all indexed notes
+    model = get_model("matching")
+
     candidates = []
     for note_key, entry in index.items():
         candidates.append({
@@ -198,7 +194,7 @@ def semantic_match(new_themes, new_tags, index):
             "topic": entry.get("topic", note_key),
             "course": entry.get("course", ""),
             "themes": entry.get("themes", []),
-            "tags": entry.get("tags", [])[:10]  # first 10 tags for brevity
+            "tags": entry.get("tags", [])[:10]
         })
 
     if not candidates:
@@ -206,8 +202,7 @@ def semantic_match(new_themes, new_tags, index):
 
     candidates_text = json.dumps(candidates, indent=2)
 
-    prompt = f"""
-You are a biomedical engineering knowledge graph assistant.
+    prompt = f"""You are a biomedical engineering knowledge graph assistant.
 
 A student just processed a new note. Your job is to identify which existing notes
 in their vault are genuinely conceptually related to the new note.
@@ -233,23 +228,27 @@ Maximum {MAX_CONNECTIONS} results, ranked by relevance (most related first).
 If nothing is genuinely related, return an empty array [].
 No preamble, no explanation, no backticks.
 
-Example: ["Membrane_Potential_2026-01-15", "RC_Circuits_2026-02-03"]
-"""
+Example: ["Membrane_Potential_2026-01-15", "RC_Circuits_2026-02-03"]"""
 
     try:
         response = client.models.generate_content(
-            model=MATCHER_MODEL,
+            model=model,
             contents=[prompt]
         )
         raw = response.text.strip()
+
+        total_tokens = response.usage_metadata.total_token_count
+        log_usage(model, total_tokens)
+
         if raw.startswith("```"):
             raw = raw.split("```")[1]
             if raw.startswith("json"):
                 raw = raw[4:]
         matched_keys = json.loads(raw.strip())
         matched_keys = [k for k in matched_keys if isinstance(k, str) and k in index]
-        print(f"  Semantic matcher found {len(matched_keys)} connection(s)")
+        print(f"  Semantic matcher found {len(matched_keys)} connection(s)  [{model}, {total_tokens} tokens]")
         return matched_keys
+
     except Exception as e:
         print(f"  Semantic matching failed: {e}")
         return []
@@ -264,11 +263,8 @@ def find_connections(formatted_note, vault_path, course=None, topic=None):
     Called by main.py and app.py.
     Returns (wikilinks, tags, themes).
     """
-
-    # Bootstrap index from existing vault notes first
     index = bootstrap_vault_index(vault_path)
 
-    # Generate tags and themes for this note
     tags, themes = generate_tags_and_themes(
         formatted_note, course or "", topic or ""
     )
@@ -276,7 +272,6 @@ def find_connections(formatted_note, vault_path, course=None, topic=None):
     if not tags and not themes:
         return [], [], []
 
-    # Semantic match against index
     matched_keys = []
     if index:
         matched_keys = semantic_match(themes, tags, index)
@@ -318,9 +313,7 @@ def register_note_tags(note_path, tags, themes, course, topic):
 def inject_connections(formatted_note, wikilinks, tags, themes):
     """
     Replaces the placeholder connections section with:
-    - Themes (named conceptual ideas)
-    - Tags (specific hyphenated concepts)
-    - Linked Notes (wikilinks to related notes)
+    - Themes, Tags, Linked Notes
     """
     themes_block = "\n".join(f"- {t}" for t in themes) if themes else "- None identified yet"
     tags_block   = ", ".join(tags) if tags else "None"
