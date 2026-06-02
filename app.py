@@ -10,9 +10,12 @@ import tempfile
 from datetime import date, datetime
 from flask import Flask, request, jsonify, send_file, Response, render_template
 from matplotlib.pylab import rint
+from exam_routes import exam_bp
 from config import OBSIDIAN_VAULT_PATH
 
 app = Flask(__name__)
+
+app.register_blueprint(exam_bp)
 
 # Thread-safe queue for streaming progress updates
 progress_queues = {}

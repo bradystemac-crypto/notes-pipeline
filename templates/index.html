@@ -133,7 +133,6 @@
     .rscard.good .rscard-val { color: var(--success); }
 
     .review-list { display: flex; flex-direction: column; gap: 0.6rem; }
-
     .review-card { background: var(--surface); border: 1.5px solid var(--rule); border-radius: 10px; padding: 1.1rem 1.25rem; display: flex; align-items: center; gap: 1.25rem; transition: border-color 0.2s; }
     .review-card.overdue { border-left: 3px solid #dc2626; }
     .review-card.due-today { border-left: 3px solid var(--punch); }
@@ -143,13 +142,11 @@
     .rc-info { flex: 1; min-width: 0; }
     .rc-name { font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.3rem; }
     .rc-meta { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--ink3); }
-
     .rc-stage { flex-shrink: 0; width: 80px; }
     .rc-stage-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--ink3); margin-bottom: 0.3rem; text-align: center; }
     .stage-track { height: 4px; background: var(--rule); border-radius: 99px; overflow: hidden; }
     .stage-fill { height: 100%; border-radius: 99px; background: var(--punch); transition: width 0.4s; }
     .stage-fill.complete { background: var(--success); }
-
     .rc-due { flex-shrink: 0; text-align: right; }
     .rc-due-date { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--ink2); }
     .rc-due-badge { display: inline-block; margin-top: 0.3rem; font-family: 'DM Mono', monospace; font-size: 0.6rem; padding: 0.15rem 0.5rem; border-radius: 99px; }
@@ -169,7 +166,6 @@
     .rtab { flex: 1; padding: 0.5rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; text-align: center; border-radius: 6px; cursor: pointer; border: none; background: transparent; color: var(--ink2); transition: all 0.15s; }
     .rtab.active { background: var(--ink); color: #f5f2ed; }
 
-
     /* ── Vault Tab ── */
     .vault-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.75rem; margin-bottom: 2rem; }
     .vs-card { background: var(--surface); border: 1.5px solid var(--rule); border-radius: 10px; padding: 1rem 1.1rem; }
@@ -184,12 +180,14 @@
     .course-toggle.collapsed { transform: rotate(-90deg); }
 
     .note-table { background: var(--surface); border: 1.5px solid var(--rule); border-radius: 10px; overflow: hidden; }
-    .note-row-v { display: grid; grid-template-columns: 1fr 90px 70px 70px 80px; align-items: center; gap: 1rem; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--rule); transition: background 0.15s; }
+    .note-row-v { display: grid; grid-template-columns: 20px 1fr 90px 70px 70px 80px; align-items: center; gap: 1rem; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--rule); transition: background 0.15s; }
     .note-row-v:last-child { border-bottom: none; }
-    .note-row-v:hover { background: #faf8f5; }
-    .note-row-v.header-row { background: var(--bg); padding: 0.5rem 1.25rem; }
+    .note-row-v:hover { background: #faf8f5; cursor: pointer; }
+    .note-row-v.header-row { background: var(--bg); padding: 0.5rem 1.25rem; grid-template-columns: 20px 1fr 90px 70px 70px 80px; }
+    .note-row-v.selected { background: var(--punch-light); }
     .col-header { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); }
 
+    .note-check { width: 16px; height: 16px; accent-color: var(--punch); cursor: pointer; }
     .note-topic { font-size: 0.85rem; font-weight: 400; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .note-modified { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--ink3); }
     .note-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 99px; }
@@ -212,6 +210,122 @@
     .vault-search:focus { border-color: var(--punch); }
     .vault-search::placeholder { color: var(--ink3); }
 
+    /* Summary/Exam bar shared pattern */
+    .summary-bar { position: sticky; bottom: 0; background: var(--surface); border-top: 1.5px solid var(--rule); padding: 1rem 1.25rem; display: none; align-items: center; gap: 1rem; border-radius: 0 0 10px 10px; margin-top: -1px; }
+    .summary-bar.visible { display: flex; }
+    .summary-bar-info { flex: 1; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--ink2); }
+    .summary-bar-info strong { color: var(--ink); }
+    .btn-summarize { background: var(--punch); color: #fff; border: none; border-radius: 6px; padding: 0.55rem 1.1rem; font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
+    .btn-summarize:hover { opacity: 0.88; }
+    .btn-summarize:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-clear-sel { background: transparent; border: 1.5px solid var(--rule); color: var(--ink2); border-radius: 6px; padding: 0.5rem 0.8rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; cursor: pointer; transition: all 0.15s; }
+    .btn-clear-sel:hover { border-color: var(--ink); color: var(--ink); }
+
+    /* Modals (shared) */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: flex; align-items: center; justify-content: center; }
+    .modal-overlay.hidden { display: none; }
+    .modal-box { background: var(--surface); border-radius: 12px; padding: 2rem; width: 520px; max-width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+    .modal-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.4rem; }
+    .modal-sub { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--ink3); margin-bottom: 1.5rem; }
+    .modal-field { margin-bottom: 1rem; }
+    .modal-field label { display: block; font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); margin-bottom: 0.4rem; }
+    .modal-field input,
+    .modal-field select { width: 100%; background: var(--bg); border: 1.5px solid var(--rule); border-radius: 8px; padding: 0.65rem 0.9rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--ink); outline: none; transition: border-color 0.2s; appearance: none; }
+    .modal-field input:focus,
+    .modal-field select:focus { border-color: var(--punch); }
+    .modal-field .input-row { margin-top: 0; }
+    .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+    .modal-confirm { flex: 1; background: var(--ink); color: #f5f2ed; border: none; border-radius: 8px; padding: 0.8rem; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: opacity 0.15s; }
+    .modal-confirm:hover { opacity: 0.85; }
+    .modal-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+    .modal-cancel { background: transparent; border: 1.5px solid var(--rule); color: var(--ink2); border-radius: 8px; padding: 0.8rem 1.2rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; cursor: pointer; transition: all 0.15s; }
+    .modal-cancel:hover { border-color: var(--ink); color: var(--ink); }
+    .summary-result { background: var(--bg); border-radius: 8px; padding: 1rem; margin-top: 1rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--ink2); line-height: 1.7; max-height: 160px; overflow-y: auto; display: none; }
+
+    /* ── Exam Tab ── */
+    /* Config row at top */
+    .exam-config-bar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .exam-config-bar .modal-field { margin-bottom: 0; flex: 1; min-width: 120px; }
+    .exam-config-bar .modal-field label { margin-bottom: 0.3rem; }
+    .exam-toggle-group { display: flex; background: var(--surface); border: 1.5px solid var(--rule); border-radius: 8px; overflow: hidden; }
+    .exam-toggle { padding: 0.6rem 1rem; font-family: 'DM Mono', monospace; font-size: 0.72rem; border: none; background: transparent; color: var(--ink2); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    .exam-toggle.active { background: var(--ink); color: #f5f2ed; }
+    .exam-toggle:not(:last-child) { border-right: 1.5px solid var(--rule); }
+
+    /* Exam note table — same as vault but narrower columns */
+    .exam-note-row { display: grid; grid-template-columns: 20px 1fr 90px 70px; align-items: center; gap: 1rem; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--rule); transition: background 0.15s; cursor: pointer; }
+    .exam-note-row:last-child { border-bottom: none; }
+    .exam-note-row:hover { background: #faf8f5; }
+    .exam-note-row.header-row { background: var(--bg); padding: 0.5rem 1.25rem; cursor: default; }
+    .exam-note-row.selected { background: var(--punch-light); }
+
+    /* Exam action bar (same pattern as summary-bar) */
+    .exam-action-bar { position: sticky; bottom: 0; background: var(--surface); border-top: 1.5px solid var(--rule); padding: 1rem 1.25rem; display: none; align-items: center; gap: 1rem; border-radius: 0 0 10px 10px; margin-top: -1px; }
+    .exam-action-bar.visible { display: flex; }
+    .exam-action-bar .summary-bar-info { flex: 1; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--ink2); }
+    .exam-action-bar .summary-bar-info strong { color: var(--ink); }
+
+    /* Quiz renderer */
+    #exam-quiz-area { display: none; }
+    #exam-quiz-area.visible { display: block; }
+
+    .quiz-topbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+    .quiz-back { background: transparent; border: 1.5px solid var(--rule); color: var(--ink2); border-radius: 6px; padding: 0.45rem 0.9rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; cursor: pointer; transition: all 0.15s; }
+    .quiz-back:hover { border-color: var(--ink); color: var(--ink); }
+    .quiz-progress-wrap { flex: 1; background: var(--rule); border-radius: 99px; height: 3px; overflow: hidden; }
+    .quiz-progress-fill { height: 100%; background: var(--punch); border-radius: 99px; transition: width 0.35s ease; }
+    .quiz-progress-label { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--ink3); white-space: nowrap; }
+
+    .question-card { background: var(--surface); border: 1.5px solid var(--rule); border-radius: 10px; padding: 1.5rem 1.75rem; margin-bottom: 1rem; animation: fadein 0.2s ease both; }
+    .q-type-badge { display: inline-block; font-family: 'DM Mono', monospace; font-size: 0.6rem; padding: 0.15rem 0.5rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.85rem; }
+    .q-type-single   { background: #dbeafe; color: #1d4ed8; }
+    .q-type-multiple { background: #ede9fe; color: #7c3aed; }
+    .q-text { font-size: 0.95rem; line-height: 1.65; color: var(--ink); margin-bottom: 1.25rem; font-weight: 400; }
+
+    .options-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+    .option-item { display: flex; align-items: flex-start; gap: 0.85rem; padding: 0.7rem 1rem; border: 1.5px solid var(--rule); border-radius: 8px; cursor: pointer; transition: border-color 0.15s, background 0.15s; font-size: 0.85rem; line-height: 1.45; color: var(--ink); }
+    .option-item:hover:not(.locked) { border-color: var(--punch); background: var(--punch-light); }
+    .option-item.selected { border-color: var(--punch); background: var(--punch-light); }
+    .option-item.correct  { border-color: var(--success); background: var(--success-light); color: var(--success); }
+    .option-item.wrong    { border-color: #dc2626; background: #fee2e2; color: #dc2626; }
+    .option-key { font-family: 'DM Mono', monospace; font-size: 0.7rem; font-weight: 500; color: var(--ink3); flex-shrink: 0; margin-top: 1px; }
+    .option-item.selected .option-key { color: var(--punch); }
+    .option-item.correct  .option-key { color: var(--success); }
+    .option-item.wrong    .option-key { color: #dc2626; }
+
+    .explanation-box { margin-top: 1rem; padding: 0.85rem 1rem; background: var(--bg); border-left: 3px solid var(--punch); border-radius: 0 6px 6px 0; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--ink2); line-height: 1.65; display: none; }
+    .explanation-box.visible { display: block; }
+
+    .quiz-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; gap: 0.75rem; }
+    .btn-nav { padding: 0.6rem 1.2rem; background: var(--surface); border: 1.5px solid var(--rule); border-radius: 8px; color: var(--ink2); font-family: 'DM Mono', monospace; font-size: 0.75rem; cursor: pointer; transition: all 0.15s; }
+    .btn-nav:hover    { border-color: var(--ink); color: var(--ink); }
+    .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-nav.primary  { background: var(--ink); border-color: var(--ink); color: #f5f2ed; font-family: 'Syne', sans-serif; font-weight: 600; }
+    .btn-nav.primary:hover { opacity: 0.85; }
+
+    /* Score screen */
+    #exam-score-screen { display: none; }
+    #exam-score-screen.visible { display: block; }
+    .score-card { background: var(--surface); border: 1.5px solid var(--rule); border-radius: 10px; padding: 2.5rem; text-align: center; }
+    .score-pct { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 3.5rem; letter-spacing: -0.04em; line-height: 1; margin-bottom: 0.5rem; }
+    .score-pct.good { color: var(--success); }
+    .score-pct.fair { color: var(--warning); }
+    .score-pct.poor { color: #dc2626; }
+    .score-verdict { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink2); margin-bottom: 2rem; }
+    .score-breakdown { display: flex; justify-content: center; gap: 3rem; margin-bottom: 2rem; }
+    .score-breakdown div { text-align: center; }
+    .score-breakdown .sb-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.5rem; letter-spacing: -0.03em; display: block; }
+    .score-breakdown .sb-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink3); }
+    .sb-correct { color: var(--success); }
+    .sb-wrong   { color: #dc2626; }
+    .sb-skipped { color: var(--ink3); }
+    .score-actions { display: flex; gap: 0.75rem; justify-content: center; }
+    .btn-score { padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+    .btn-score.outline { background: transparent; border: 1.5px solid var(--rule); color: var(--ink2); }
+    .btn-score.outline:hover { border-color: var(--ink); color: var(--ink); }
+    .btn-score.filled { background: var(--ink); border: 1.5px solid var(--ink); color: #f5f2ed; }
+    .btn-score.filled:hover { opacity: 0.85; }
+
     /* Animations */
     @keyframes spin { to { transform: rotate(360deg); } }
     .spin { animation: spin 0.8s linear infinite; display: inline-block; }
@@ -221,42 +335,6 @@
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #3a3530; border-radius: 2px; }
-
-    /* Summary panel in Vault tab */
-.summary-bar { position: sticky; bottom: 0; background: var(--surface); border-top: 1.5px solid var(--rule); padding: 1rem 1.25rem; display: none; align-items: center; gap: 1rem; border-radius: 0 0 10px 10px; margin-top: -1px; }
-.summary-bar.visible { display: flex; }
-.summary-bar-info { flex: 1; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--ink2); }
-.summary-bar-info strong { color: var(--ink); }
-.btn-summarize { background: var(--punch); color: #fff; border: none; border-radius: 6px; padding: 0.55rem 1.1rem; font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
-.btn-summarize:hover { opacity: 0.88; }
-.btn-summarize:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-clear-sel { background: transparent; border: 1.5px solid var(--rule); color: var(--ink2); border-radius: 6px; padding: 0.5rem 0.8rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; cursor: pointer; transition: all 0.15s; }
-.btn-clear-sel:hover { border-color: var(--ink); color: var(--ink); }
- 
-/* Checkbox column in note rows */
-.note-row-v { grid-template-columns: 20px 1fr 90px 70px 70px 80px; }
-.note-row-v.header-row { grid-template-columns: 20px 1fr 90px 70px 70px 80px; }
-.note-check { width: 16px; height: 16px; accent-color: var(--punch); cursor: pointer; }
-.note-row-v:hover { background: #faf8f5; cursor: pointer; }
-.note-row-v.selected { background: var(--punch-light); }
- 
-/* Summary modal */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: flex; align-items: center; justify-content: center; }
-.modal-overlay.hidden { display: none; }
-.modal-box { background: var(--surface); border-radius: 12px; padding: 2rem; width: 520px; max-width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-.modal-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.4rem; }
-.modal-sub { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--ink3); margin-bottom: 1.5rem; }
-.modal-field { margin-bottom: 1rem; }
-.modal-field label { display: block; font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); margin-bottom: 0.4rem; }
-.modal-field input { width: 100%; background: var(--bg); border: 1.5px solid var(--rule); border-radius: 8px; padding: 0.65rem 0.9rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--ink); outline: none; transition: border-color 0.2s; }
-.modal-field input:focus { border-color: var(--punch); }
-.modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
-.modal-confirm { flex: 1; background: var(--ink); color: #f5f2ed; border: none; border-radius: 8px; padding: 0.8rem; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: opacity 0.15s; }
-.modal-confirm:hover { opacity: 0.85; }
-.modal-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
-.modal-cancel { background: transparent; border: 1.5px solid var(--rule); color: var(--ink2); border-radius: 8px; padding: 0.8rem 1.2rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; cursor: pointer; transition: all 0.15s; }
-.modal-cancel:hover { border-color: var(--ink); color: var(--ink); }
-.summary-result { background: var(--bg); border-radius: 8px; padding: 1rem; margin-top: 1rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--ink2); line-height: 1.7; max-height: 160px; overflow-y: auto; display: none; }
   </style>
 </head>
 <body>
@@ -265,7 +343,7 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-logo">Notes<br>Pipeline</div>
-    <div class="sidebar-sub">v2.0 — UF BME</div>
+    <div class="sidebar-sub">v6.0 — UF BME</div>
 
     <nav class="sidebar-nav">
       <div class="nav-section-label">Pipeline</div>
@@ -302,6 +380,9 @@
       </button>
       <button class="nav-item" onclick="showPage('vault')" id="nav-vault">
         <i class="fa fa-folder-open"></i> Vault
+      </button>
+      <button class="nav-item" onclick="showPage('exam')" id="nav-exam">
+        <i class="fa fa-bolt"></i> Exam Prep
       </button>
     </nav>
 
@@ -410,23 +491,12 @@
       <div class="page-title">Review Queue</div>
       <div class="page-sub">Spaced repetition schedule — mark notes as reviewed to advance stages</div>
 
-      <!-- Summary cards -->
       <div class="review-summary">
-        <div class="rscard urgent" id="rs-overdue">
-          <div class="rscard-label">Overdue</div>
-          <div class="rscard-val" id="rs-overdue-val">—</div>
-        </div>
-        <div class="rscard" id="rs-today">
-          <div class="rscard-label">Due Today</div>
-          <div class="rscard-val" id="rs-today-val">—</div>
-        </div>
-        <div class="rscard good" id="rs-total">
-          <div class="rscard-label">Total Notes</div>
-          <div class="rscard-val" id="rs-total-val">—</div>
-        </div>
+        <div class="rscard urgent"><div class="rscard-label">Overdue</div><div class="rscard-val" id="rs-overdue-val">—</div></div>
+        <div class="rscard"><div class="rscard-label">Due Today</div><div class="rscard-val" id="rs-today-val">—</div></div>
+        <div class="rscard good"><div class="rscard-label">Total Notes</div><div class="rscard-val" id="rs-total-val">—</div></div>
       </div>
 
-      <!-- Tabs -->
       <div class="review-tabs">
         <button class="rtab active" onclick="switchReviewTab('due')" id="rtab-due">Due Now</button>
         <button class="rtab" onclick="switchReviewTab('all')" id="rtab-all">All Notes</button>
@@ -444,13 +514,12 @@
       </div>
     </div>
 
-
     <!-- ══ VAULT PAGE ══ -->
     <div id="page-vault" style="display:none;">
       <div class="page-title">Vault</div>
       <div class="page-sub">All notes organized by course — live from your Obsidian vault</div>
 
-      <div class="vault-stats" id="vault-stats">
+      <div class="vault-stats">
         <div class="vs-card"><div class="vs-label">Total Notes</div><div class="vs-val" id="vstat-notes">—</div></div>
         <div class="vs-card"><div class="vs-label">Courses</div><div class="vs-val" id="vstat-courses">—</div></div>
         <div class="vs-card"><div class="vs-label">Open Questions</div><div class="vs-val" id="vstat-questions">—</div></div>
@@ -464,31 +533,125 @@
       </div>
     </div>
 
-    <!-- Summary modal -->
-  <div class="modal-overlay hidden" id="summary-modal">
-    <div class="modal-box">
-      <div class="modal-title">Generate Summary Note</div>
-      <div class="modal-sub" id="modal-sub">Synthesizing <span id="modal-note-count">0</span> notes</div>
- 
-      <div class="modal-field">
-        <label>Summary Title</label>
-        <input type="text" id="summary-title" placeholder="e.g. Membrane Potential Synthesis"/>
+    <!-- ══ EXAM PAGE ══ -->
+    <div id="page-exam" style="display:none;">
+      <div class="page-title">Exam Prep</div>
+      <div class="page-sub">Select notes, configure your quiz, and generate questions from your vault</div>
+
+      <!-- Note picker + action bar (hidden during quiz) -->
+      <div id="exam-picker-area">
+
+        <!-- Config bar -->
+        <div class="section-block">
+          <div class="section-head">
+            <span class="section-num">01</span>
+            <span class="section-title">Configure</span>
+            <div class="section-rule"></div>
+          </div>
+          <div style="display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-end;">
+            <div class="modal-field" style="margin:0; flex:1; min-width:140px;">
+              <label>Question Type</label>
+              <div class="exam-toggle-group">
+                <button class="exam-toggle active" id="toggle-single" onclick="setExamType('single', this)">Single Answer</button>
+                <button class="exam-toggle" id="toggle-multiple" onclick="setExamType('multiple', this)">Multi-Answer</button>
+              </div>
+            </div>
+            <div class="modal-field" style="margin:0; flex:1; min-width:140px;">
+              <label>Difficulty</label>
+              <select id="exam-difficulty">
+                <option value="easy">Easy — direct recall</option>
+                <option value="medium" selected>Medium — apply concepts</option>
+                <option value="hard">Hard — synthesize</option>
+              </select>
+            </div>
+            <div class="modal-field" style="margin:0; width:110px;">
+              <label>Questions</label>
+              <input type="number" id="exam-count" value="10" min="1" max="50" style="background:var(--surface);border:1.5px solid var(--rule);border-radius:8px;padding:0.65rem 0.9rem;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--ink);outline:none;width:100%;"/>
+            </div>
+            <div class="modal-field" style="margin:0; flex:1; min-width:140px;">
+              <label>Feedback</label>
+              <div class="exam-toggle-group">
+                <button class="exam-toggle active" id="toggle-feedback-end" onclick="setFeedbackMode('end', this)">After Exam</button>
+                <button class="exam-toggle" id="toggle-feedback-immediate" onclick="setFeedbackMode('immediate', this)">Immediate</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Note picker -->
+        <div class="section-block">
+          <div class="section-head">
+            <span class="section-num">02</span>
+            <span class="section-title">Select Notes</span>
+            <div class="section-rule"></div>
+          </div>
+
+          <div id="exam-error" style="display:none; background:#fee2e2; border:1.5px solid #fca5a5; border-radius:8px; padding:0.75rem 1rem; margin-bottom:1rem; font-family:'DM Mono',monospace; font-size:0.75rem; color:#dc2626;"></div>
+
+          <div id="exam-courses">
+            <div class="empty-state"><i class="fa fa-spinner spin"></i>Loading vault...</div>
+          </div>
+        </div>
       </div>
-      <div class="modal-field">
-        <label>Course</label>
-        <input type="text" id="summary-course" placeholder="e.g. BME3503"/>
+
+      <!-- Quiz area -->
+      <div id="exam-quiz-area">
+        <div class="quiz-topbar">
+          <button class="quiz-back" onclick="exitQuiz()">← Back</button>
+          <div class="quiz-progress-wrap">
+            <div class="quiz-progress-fill" id="quiz-progress-fill" style="width:0%"></div>
+          </div>
+          <span class="quiz-progress-label" id="quiz-progress-label">1 / 10</span>
+        </div>
+        <div id="quiz-question-container"></div>
+        <div class="quiz-nav">
+          <button class="btn-nav" id="qnav-prev" onclick="quizNavigate(-1)" disabled>← Prev</button>
+          <button class="btn-nav" id="qnav-skip" onclick="quizSkip()">Skip</button>
+          <button class="btn-nav primary" id="qnav-next" onclick="quizNavigate(1)">Next →</button>
+        </div>
       </div>
- 
-      <div class="summary-result" id="summary-result"></div>
- 
-      <div class="modal-actions">
-        <button class="modal-cancel" onclick="closeSummaryModal()">Cancel</button>
-        <button class="modal-confirm" id="modal-confirm-btn" onclick="submitSummary()">
-          <i class="fa fa-magic"></i> Generate
-        </button>
+
+      <!-- Score screen -->
+      <div id="exam-score-screen">
+        <div class="score-card">
+          <div class="score-pct" id="score-pct-val">—%</div>
+          <div class="score-verdict" id="score-verdict">—</div>
+          <div class="score-breakdown">
+            <div><span class="sb-val sb-correct" id="sc-correct">0</span><span class="sb-label">Correct</span></div>
+            <div><span class="sb-val sb-wrong"   id="sc-wrong">0</span><span class="sb-label">Wrong</span></div>
+            <div><span class="sb-val sb-skipped" id="sc-skipped">0</span><span class="sb-label">Skipped</span></div>
+          </div>
+          <div class="score-actions">
+            <button class="btn-score outline" onclick="examReset()">New Exam</button>
+            <button class="btn-score filled"  onclick="examReview()">Review Answers</button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+
+    <!-- Summary modal -->
+    <div class="modal-overlay hidden" id="summary-modal">
+      <div class="modal-box">
+        <div class="modal-title">Generate Summary Note</div>
+        <div class="modal-sub">Synthesizing <span id="modal-note-count">0</span> notes</div>
+        <div class="modal-field">
+          <label>Summary Title</label>
+          <input type="text" id="summary-title" placeholder="e.g. Membrane Potential Synthesis"/>
+        </div>
+        <div class="modal-field">
+          <label>Course</label>
+          <input type="text" id="summary-course" placeholder="e.g. BME3503"/>
+        </div>
+        <div class="summary-result" id="summary-result"></div>
+        <div class="modal-actions">
+          <button class="modal-cancel" onclick="closeSummaryModal()">Cancel</button>
+          <button class="modal-confirm" id="modal-confirm-btn" onclick="submitSummary()">
+            <i class="fa fa-magic"></i> Generate
+          </button>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -500,7 +663,7 @@
   const INTERVALS = [1,3,7,14,30,60];
   let currentReviewTab = 'due';
 
-  // ── Dropzone ──
+  // ── Dropzone ──────────────────────────────────────────────────────────────
   myDropzone = new Dropzone("#pdf-dropzone", {
     url: "/run", autoProcessQueue: false, maxFiles: 1, acceptedFiles: ".pdf", addRemoveLinks: true,
     dictDefaultMessage: "",
@@ -510,19 +673,18 @@
     }
   });
 
-  // ── Page routing ──
+  // ── Page routing ──────────────────────────────────────────────────────────
   function showPage(page) {
-    document.getElementById('page-upload').style.display = page === 'upload' ? 'block' : 'none';
-    document.getElementById('page-review').style.display = page === 'review' ? 'block' : 'none';
-    document.getElementById('page-vault').style.display = page === 'vault' ? 'block' : 'none';
-    document.getElementById('nav-upload').classList.toggle('active', page === 'upload');
-    document.getElementById('nav-review').classList.toggle('active', page === 'review');
-    document.getElementById('nav-vault').classList.toggle('active', page === 'vault');
+    ['upload','review','vault','exam'].forEach(p => {
+      document.getElementById(`page-${p}`).style.display = p === page ? 'block' : 'none';
+      document.getElementById(`nav-${p}`).classList.toggle('active', p === page);
+    });
     if (page === 'review') loadReview();
-    if (page === 'vault') loadVault();
+    if (page === 'vault')  loadVault();
+    if (page === 'exam')   loadExamVault();
   }
 
-  // ── Pipeline ──
+  // ── Pipeline ──────────────────────────────────────────────────────────────
   function setStage(n, state) {
     const row = document.getElementById(`stage-${n}`);
     const ind = document.getElementById(`si-${n}`);
@@ -573,6 +735,9 @@
       if (data.download_url) { const btn = document.getElementById('download-btn'); btn.href = data.download_url; btn.style.display = 'block'; }
       document.getElementById('reset-btn').style.display = 'block';
       loadDueBadge();
+      // ── Refresh vault data so new note appears immediately ──
+      vaultData = null;
+      examVaultData = null;
     }
     if (data.error) { setStage(currentStage, 'error'); document.getElementById('reset-btn').style.display = 'block'; }
   }
@@ -620,7 +785,7 @@
     uploadedFile = null;
   }
 
-  // ── Review ──
+  // ── Review ────────────────────────────────────────────────────────────────
   function switchReviewTab(tab) {
     currentReviewTab = tab;
     document.getElementById('rtab-due').classList.toggle('active', tab === 'due');
@@ -651,22 +816,18 @@
 
   function renderReview(notes) {
     const list = document.getElementById('review-list');
-    const today = new Date().toISOString().split('T')[0];
-
     if (currentReviewTab === 'due') {
       const overdue = notes.filter(n => n.days_overdue > 0).length;
       const dueToday = notes.filter(n => n.days_overdue === 0).length;
       document.getElementById('rs-overdue-val').textContent = overdue;
       document.getElementById('rs-today-val').textContent = dueToday;
     }
-
     if (notes.length === 0) {
       list.innerHTML = currentReviewTab === 'due'
         ? '<div class="empty-state"><i class="fa fa-check-circle"></i>All caught up — no notes due for review.</div>'
         : '<div class="empty-state"><i class="fa fa-inbox"></i>No notes tracked yet. Run the pipeline to add notes.</div>';
       return;
     }
-
     list.innerHTML = '';
     notes.forEach(note => {
       const isDue = currentReviewTab === 'due';
@@ -678,7 +839,6 @@
       const nextReview = note.due || note.next_review || '';
       const noteName = note.name || '';
       const displayName = noteName.replace(/_/g, ' ').replace(/\.md$/, '');
-
       let cardClass = 'review-card';
       let badgeHtml = '';
       if (isDue) {
@@ -689,7 +849,6 @@
         else if (daysUntil === 0) { cardClass += ' due-today'; badgeHtml = `<span class="rc-due-badge badge-today">due today</span>`; }
         else { cardClass += ' upcoming'; badgeHtml = `<span class="rc-due-badge badge-upcoming">in ${daysUntil}d</span>`; }
       }
-
       const card = document.createElement('div');
       card.className = cardClass;
       card.id = `rc-${noteName}`;
@@ -710,8 +869,6 @@
       `;
       list.appendChild(card);
     });
-
-    // Update total count
     fetch('/review/all').then(r=>r.json()).then(all => {
       document.getElementById('rs-total-val').textContent = all.length;
     });
@@ -738,11 +895,10 @@
     .catch(() => { btn.disabled = false; btn.innerHTML = '<i class="fa fa-check"></i> Done'; });
   }
 
-
-  // ── Vault ──
+  // ── Vault ─────────────────────────────────────────────────────────────────
   let vaultData = null;
-  let selectedNotes = new Map(); // key → { path, course }
- 
+  let selectedNotes = new Map();
+
   function loadVault() {
     fetch('/vault')
       .then(r => r.json())
@@ -751,32 +907,28 @@
         document.getElementById('vault-courses').innerHTML = '<div class="empty-state"><i class="fa fa-exclamation-triangle"></i>Could not load vault data.</div>';
       });
   }
- 
+
   function renderVault(data) {
     const s = data.stats;
     document.getElementById('vstat-notes').textContent = s.total_notes;
     document.getElementById('vstat-courses').textContent = s.total_courses;
     document.getElementById('vstat-questions').textContent = s.total_questions;
     document.getElementById('vstat-connections').textContent = s.total_connections;
- 
     const container = document.getElementById('vault-courses');
     container.innerHTML = '';
- 
     if (Object.keys(data.courses).length === 0) {
       container.innerHTML = '<div class="empty-state"><i class="fa fa-folder-open"></i>No notes found in vault.</div>';
       return;
     }
- 
     Object.entries(data.courses).sort().forEach(([course, notes]) => {
       container.appendChild(buildCourseBlock(course, notes));
     });
   }
- 
+
   function buildCourseBlock(course, notes) {
     const block = document.createElement('div');
     block.className = 'course-block';
     block.dataset.course = course;
- 
     const header = document.createElement('div');
     header.className = 'course-header';
     header.innerHTML = `
@@ -786,11 +938,9 @@
       <div class="section-rule"></div>
       <i class="fa fa-chevron-down course-toggle" id="toggle-${course}"></i>
     `;
- 
     const table = document.createElement('div');
     table.className = 'note-table';
     table.id = `table-${course}`;
- 
     table.innerHTML = `
       <div class="note-row-v header-row">
         <div></div>
@@ -801,39 +951,31 @@
         <div class="col-header">Stage</div>
       </div>
     `;
- 
     notes.forEach(note => {
       const row = document.createElement('div');
       row.className = 'note-row-v';
       row.dataset.topic = (note.topic || '').toLowerCase();
       row.dataset.name  = (note.name || '').toLowerCase();
       row.dataset.key   = note.name;
-      row.dataset.path = String(note.path || '');
+      row.dataset.path  = String(note.path || '');
       row.dataset.course = course;
- 
       const modStr    = note.days_ago === 0 ? 'today' : note.days_ago === 1 ? 'yesterday' : `${note.days_ago}d ago`;
       const typeMap   = { notes: 'type-notes', problems: 'type-problems', mixed: 'type-mixed' };
       const typeClass = typeMap[note.type] || 'type-unknown';
       const typeLabel = note.type || '—';
- 
       let itemsHtml = '<span class="badge-none">—</span>';
       if (note.questions > 0) itemsHtml = `<span class="note-badge badge-q">❓${note.questions}</span>`;
       else if (note.connections > 0) itemsHtml = `<span class="note-badge badge-c">🔗${note.connections}</span>`;
- 
       let pipsHtml = '<span class="badge-none">—</span>';
       if (note.review_stage !== null && note.review_stage !== undefined) {
         const stage = note.review_stage + 1;
         const isComplete = stage >= 6;
         pipsHtml = '<div class="stage-pip-row">';
-        for (let i = 0; i < 6; i++) {
-          pipsHtml += `<div class="stage-pip ${i < stage ? (isComplete ? 'complete' : 'filled') : ''}"></div>`;
-        }
+        for (let i = 0; i < 6; i++) pipsHtml += `<div class="stage-pip ${i < stage ? (isComplete ? 'complete' : 'filled') : ''}"></div>`;
         pipsHtml += '</div>';
       }
- 
       const isSelected = selectedNotes.has(note.name);
       if (isSelected) row.classList.add('selected');
- 
       row.innerHTML = `
         <input type="checkbox" class="note-check" ${isSelected ? 'checked' : ''}/>
         <div class="note-topic" title="${note.name}">${note.topic}</div>
@@ -842,26 +984,19 @@
         <div>${itemsHtml}</div>
         <div>${pipsHtml}</div>
       `;
-
       const cb = row.querySelector('.note-check');
-
       cb.addEventListener('click', (e) => {
         e.stopPropagation();
         toggleNoteSelect(e, note.name, note.path || '', course, cb.checked);
       });
- 
-      // Click row to toggle (but not when clicking the checkbox directly)
       row.addEventListener('click', (e) => {
         if (e.target.classList.contains('note-check')) return;
         const cb = row.querySelector('.note-check');
         cb.checked = !cb.checked;
         toggleNoteSelect({ stopPropagation: ()=>{} }, note.name, note.path || '', course, cb.checked);
       });
- 
       table.appendChild(row);
     });
- 
-    // Sticky summary bar at bottom of each course table
     const summaryBar = document.createElement('div');
     summaryBar.className = 'summary-bar';
     summaryBar.id = `sbar-${course}`;
@@ -871,51 +1006,35 @@
       <button class="btn-summarize" onclick="openSummaryModal('${course}')"><i class="fa fa-magic"></i> Summarize</button>
     `;
     table.appendChild(summaryBar);
- 
     header.addEventListener('click', () => {
       const toggle = document.getElementById(`toggle-${course}`);
       const isCollapsed = table.style.display === 'none';
       table.style.display = isCollapsed ? 'block' : 'none';
       toggle.classList.toggle('collapsed', !isCollapsed);
     });
- 
     block.appendChild(header);
     block.appendChild(table);
     return block;
   }
- 
+
   function toggleNoteSelect(e, key, path, course, forcedState) {
     e.stopPropagation && e.stopPropagation();
     const isNowSelected = forcedState !== undefined ? forcedState : !selectedNotes.has(key);
- 
-    if (isNowSelected) {
-      selectedNotes.set(key, { path, course });
-    } else {
-      selectedNotes.delete(key);
-    }
- 
-    console.log("SELECTED PATH:", path);
-
-    // Update row highlight
-    const rows = document.querySelectorAll(`.note-row-v[data-key="${key}"]`);
-    rows.forEach(r => r.classList.toggle('selected', isNowSelected));
- 
+    if (isNowSelected) selectedNotes.set(key, { path, course });
+    else selectedNotes.delete(key);
+    document.querySelectorAll(`.note-row-v[data-key="${key}"]`).forEach(r => r.classList.toggle('selected', isNowSelected));
     updateSummaryBar(course);
   }
- 
+
   function updateSummaryBar(course) {
     const courseSelected = [...selectedNotes.values()].filter(v => v.course === course);
     const bar   = document.getElementById(`sbar-${course}`);
     const count = document.getElementById(`sbar-count-${course}`);
     if (!bar) return;
-    if (courseSelected.length > 0) {
-      bar.classList.add('visible');
-      count.textContent = courseSelected.length;
-    } else {
-      bar.classList.remove('visible');
-    }
+    if (courseSelected.length > 0) { bar.classList.add('visible'); count.textContent = courseSelected.length; }
+    else { bar.classList.remove('visible'); }
   }
- 
+
   function clearCourseSelection(course) {
     [...selectedNotes.entries()].forEach(([key, val]) => {
       if (val.course === course) {
@@ -929,11 +1048,10 @@
     });
     updateSummaryBar(course);
   }
- 
+
   function openSummaryModal(course) {
     const courseSelected = [...selectedNotes.values()].filter(v => v.course === course);
     if (courseSelected.length === 0) return;
- 
     document.getElementById('modal-note-count').textContent = courseSelected.length;
     document.getElementById('summary-course').value = course;
     document.getElementById('summary-title').value = '';
@@ -944,27 +1062,18 @@
     document.getElementById('summary-modal').classList.remove('hidden');
     setTimeout(() => document.getElementById('summary-title').focus(), 100);
   }
- 
-  function closeSummaryModal() {
-    document.getElementById('summary-modal').classList.add('hidden');
-  }
- 
+
+  function closeSummaryModal() { document.getElementById('summary-modal').classList.add('hidden'); }
+
   function submitSummary() {
     const title  = document.getElementById('summary-title').value.trim();
     const course = document.getElementById('summary-course').value.trim();
     if (!title) { document.getElementById('summary-title').focus(); return; }
- 
-    const paths = [...selectedNotes.values()]
-      .filter(v => v.course === course)
-      .map(v => v.path)
-      .filter(Boolean);
- 
+    const paths = [...selectedNotes.values()].filter(v => v.course === course).map(v => v.path).filter(Boolean);
     if (paths.length === 0) { closeSummaryModal(); return; }
- 
     const btn = document.getElementById('modal-confirm-btn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fa fa-circle-notch spin"></i> Generating...';
- 
     fetch('/summary/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -993,7 +1102,7 @@
       document.getElementById('summary-result').textContent = '❌ Request failed: ' + err;
     });
   }
- 
+
   function filterVault(query) {
     if (!vaultData) return;
     const q = query.toLowerCase().trim();
@@ -1010,11 +1119,411 @@
     });
     renderVault(filtered);
   }
- 
-  // Close modal on overlay click
+
   document.getElementById('summary-modal').addEventListener('click', function(e) {
     if (e.target === this) closeSummaryModal();
   });
+
+  // ── Exam Tab ──────────────────────────────────────────────────────────────
+  let examVaultData  = null;
+  let examSelected   = new Map(); // key → { path, course }
+  const examState    = {
+    qType:      'single',
+    feedback:   'end',
+    questions:  [],
+    answers:    {},       // index → [optionIdx, ...]
+    skipped:    new Set(),
+    current:    0,
+    reviewMode: false,
+  };
+
+  function setExamType(type, btn) {
+    examState.qType = type;
+    document.querySelectorAll('#toggle-single, #toggle-multiple').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function setFeedbackMode(mode, btn) {
+    examState.feedback = mode;
+    document.querySelectorAll('#toggle-feedback-end, #toggle-feedback-immediate').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function loadExamVault() {
+    fetch('/vault')
+      .then(r => r.json())
+      .then(data => {
+        console.log("📦 RAW /vault RESPONSE:", data);
+
+        examVaultData = data;
+        renderExamPicker(data);
+      })
+      .catch(err => {
+        console.error("VAULT FETCH FAILED:", err);
+
+        document.getElementById('exam-courses').innerHTML =
+          '<div class="empty-state"><i class="fa fa-exclamation-triangle"></i>Could not load vault.</div>';
+      });
+  }
+
+  function renderExamPicker(data) {
+    console.log("🧠 renderExamPicker INPUT:", data);
+    const container = document.getElementById('exam-courses');
+    container.innerHTML = '';
+    if (Object.keys(data.courses).length === 0) {
+      container.innerHTML = '<div class="empty-state"><i class="fa fa-folder-open"></i>No notes found in vault.</div>';
+      return;
+    }
+    Object.entries(data.courses).sort().forEach(([course, notes]) => {
+      container.appendChild(buildExamCourseBlock(course, notes));
+    });
+  }
+
+  function buildExamCourseBlock(course, notes) {
+    const block = document.createElement('div');
+    block.className = 'course-block';
+
+    const header = document.createElement('div');
+    header.className = 'course-header';
+    header.innerHTML = `
+      <div class="section-rule" style="width:24px;flex:none;"></div>
+      <div class="course-name">${course}</div>
+      <div class="course-count">${notes.length} note${notes.length !== 1 ? 's' : ''}</div>
+      <div class="section-rule"></div>
+      <i class="fa fa-chevron-down course-toggle" id="exam-toggle-${course}"></i>
+    `;
+
+    const table = document.createElement('div');
+    table.className = 'note-table';
+    table.id = `exam-table-${course}`;
+    table.innerHTML = `
+      <div class="exam-note-row header-row">
+        <div></div>
+        <div class="col-header">Topic</div>
+        <div class="col-header">Modified</div>
+        <div class="col-header">Type</div>
+      </div>
+    `;
+
+    notes.forEach(note => {
+      const row = document.createElement('div');
+      row.className = 'exam-note-row';
+      row.dataset.key    = note.name;
+      row.dataset.path   = String(note.path || '');
+      row.dataset.course = course;
+
+      const modStr    = note.days_ago === 0 ? 'today' : note.days_ago === 1 ? 'yesterday' : `${note.days_ago}d ago`;
+      const typeMap   = { notes: 'type-notes', problems: 'type-problems', mixed: 'type-mixed' };
+      const typeClass = typeMap[note.type] || 'type-unknown';
+
+      const isSelected = examSelected.has(note.name);
+      if (isSelected) row.classList.add('selected');
+
+      row.innerHTML = `
+        <input type="checkbox" class="note-check" ${isSelected ? 'checked' : ''}/>
+        <div class="note-topic" title="${note.name}">${note.topic}</div>
+        <div class="note-modified">${modStr}</div>
+        <div><span class="type-chip ${typeClass}">${note.type || '—'}</span></div>
+      `;
+
+      const cb = row.querySelector('.note-check');
+      cb.addEventListener('click', e => {
+        e.stopPropagation();
+        toggleExamSelect(note.name, note.path || '', course, cb.checked);
+      });
+      row.addEventListener('click', e => {
+        if (e.target.classList.contains('note-check')) return;
+        cb.checked = !cb.checked;
+        toggleExamSelect(note.name, note.path || '', course, cb.checked);
+      });
+
+      table.appendChild(row);
+    });
+
+    // Action bar (same sticky bar pattern)
+    const bar = document.createElement('div');
+    bar.className = 'exam-action-bar';
+    bar.id = `exam-bar-${course}`;
+    bar.innerHTML = `
+      <div class="summary-bar-info"><strong id="exam-bar-count-${course}">0</strong> notes selected from ${course}</div>
+      <button class="btn-clear-sel" onclick="clearExamCourse('${course}')">Clear</button>
+    `;
+    table.appendChild(bar);
+
+    header.addEventListener('click', () => {
+      const toggle = document.getElementById(`exam-toggle-${course}`);
+      const collapsed = table.style.display === 'none';
+      table.style.display = collapsed ? 'block' : 'none';
+      toggle.classList.toggle('collapsed', !collapsed);
+    });
+
+    block.appendChild(header);
+    block.appendChild(table);
+    return block;
+  }
+
+  function toggleExamSelect(key, path, course, state) {
+    if (state) examSelected.set(key, { path, course });
+    else examSelected.delete(key);
+    document.querySelectorAll(`.exam-note-row[data-key="${key}"]`).forEach(r => r.classList.toggle('selected', state));
+    updateExamBar(course);
+    updateGlobalExamBar();
+  }
+
+  function updateExamBar(course) {
+    const count = [...examSelected.values()].filter(v => v.course === course).length;
+    const bar   = document.getElementById(`exam-bar-${course}`);
+    const num   = document.getElementById(`exam-bar-count-${course}`);
+    if (!bar) return;
+    bar.classList.toggle('visible', count > 0);
+    if (num) num.textContent = count;
+  }
+
+  function clearExamCourse(course) {
+    [...examSelected.entries()].forEach(([key, val]) => {
+      if (val.course === course) {
+        examSelected.delete(key);
+        document.querySelectorAll(`.exam-note-row[data-key="${key}"]`).forEach(r => {
+          r.classList.remove('selected');
+          const cb = r.querySelector('.note-check');
+          if (cb) cb.checked = false;
+        });
+      }
+    });
+    updateExamBar(course);
+    updateGlobalExamBar();
+  }
+
+  // Global sticky generate bar at the bottom of the page
+  let globalExamBar = null;
+  function updateGlobalExamBar() {
+    const total = examSelected.size;
+    if (!globalExamBar) {
+      globalExamBar = document.createElement('div');
+      globalExamBar.style.cssText = 'position:fixed;bottom:0;right:0;left:260px;background:var(--ink);padding:1rem 3.5rem;display:flex;align-items:center;gap:1rem;z-index:50;transition:transform 0.25s;';
+      globalExamBar.innerHTML = `
+        <div style="flex:1;font-family:'DM Mono',monospace;font-size:0.75rem;color:#b5b0aa;">
+          <strong id="global-exam-count" style="color:#f5f2ed;">0</strong> notes selected
+        </div>
+        <button onclick="startExam()" style="background:var(--punch);color:#fff;border:none;border-radius:6px;padding:0.6rem 1.5rem;font-family:'Syne',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">
+          <i class="fa fa-bolt"></i> Generate Exam
+        </button>
+      `;
+      document.body.appendChild(globalExamBar);
+    }
+    globalExamBar.style.transform = total > 0 ? 'translateY(0)' : 'translateY(110%)';
+    const counter = document.getElementById('global-exam-count');
+    if (counter) counter.textContent = total;
+  }
+
+  // Hide global bar when not on exam page
+  function hideGlobalExamBar() {
+    if (globalExamBar) globalExamBar.style.transform = 'translateY(110%)';
+  }
+
+  // ── Quiz logic ────────────────────────────────────────────────────────────
+  async function startExam() {
+    const paths = [...examSelected.values()].map(v => v.path).filter(Boolean);
+    if (!paths.length) { showExamError('Select at least one note.'); return; }
+
+    const count = parseInt(document.getElementById('exam-count').value, 10);
+    if (isNaN(count) || count < 1 || count > 50) { showExamError('Question count must be 1–50.'); return; }
+
+    showExamError('');
+
+    // Show spinner on the generate button
+    const genBtn = globalExamBar.querySelector('button');
+    genBtn.disabled = true;
+    genBtn.innerHTML = '<i class="fa fa-circle-notch spin"></i> Generating...';
+
+    try {
+      const res = await fetch('/exam/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          note_paths: paths,
+          count,
+          difficulty: document.getElementById('exam-difficulty').value,
+          q_type:     examState.qType,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { showExamError(data.error || 'Generation failed.'); return; }
+
+      examState.questions  = data.questions;
+      examState.answers    = {};
+      examState.skipped    = new Set();
+      examState.current    = 0;
+      examState.reviewMode = false;
+
+      document.getElementById('exam-picker-area').style.display = 'none';
+      hideGlobalExamBar();
+      document.getElementById('exam-score-screen').classList.remove('visible');
+      document.getElementById('exam-quiz-area').classList.add('visible');
+      renderQuizQuestion();
+
+    } catch (err) {
+      showExamError('Network error: ' + err.message);
+    } finally {
+      genBtn.disabled = false;
+      genBtn.innerHTML = '<i class="fa fa-bolt"></i> Generate Exam';
+    }
+  }
+
+  function showExamError(msg) {
+    const el = document.getElementById('exam-error');
+    el.textContent = msg;
+    el.style.display = msg ? 'block' : 'none';
+  }
+
+  function renderQuizQuestion() {
+    const q     = examState.questions[examState.current];
+    const idx   = examState.current;
+    const total = examState.questions.length;
+    const sel   = examState.answers[idx] || [];
+    const locked = examState.reviewMode ||
+      (examState.feedback === 'immediate' && examState.answers[idx] !== undefined && examState.answers[idx].length > 0);
+
+    // Progress
+    const answered = Object.keys(examState.answers).length + examState.skipped.size;
+    document.getElementById('quiz-progress-fill').style.width = `${Math.round((answered / total) * 100)}%`;
+    document.getElementById('quiz-progress-label').textContent = `${idx + 1} / ${total}`;
+
+    // Nav
+    document.getElementById('qnav-prev').disabled = idx === 0;
+    document.getElementById('qnav-skip').style.display = examState.reviewMode ? 'none' : '';
+    document.getElementById('qnav-next').textContent =
+      (idx === total - 1 && !examState.reviewMode) ? 'Submit →' : 'Next →';
+
+    const letters = ['A','B','C','D'];
+    const optionsHtml = q.options.map((opt, oi) => {
+      let cls = 'option-item';
+      if (sel.includes(oi)) cls += ' selected';
+      if (locked) {
+        cls += ' locked';
+        if (q.correct.includes(oi)) cls += ' correct';
+        else if (sel.includes(oi)) cls += ' wrong';
+      }
+      const clickAttr = locked ? '' : `onclick="quizToggleOption(${idx}, ${oi})"`;
+      return `<li class="${cls}" ${clickAttr}>
+        <span class="option-key">${letters[oi]}</span>
+        <span>${opt}</span>
+      </li>`;
+    }).join('');
+
+    const showExp = locked && q.explanation;
+
+    document.getElementById('quiz-question-container').innerHTML = `
+      <div class="question-card">
+        <span class="q-type-badge q-type-${q.type}">${q.type === 'single' ? 'Single Answer' : 'Multi-Answer'}</span>
+        <div class="q-text">${q.question}</div>
+        <ul class="options-list">${optionsHtml}</ul>
+        <div class="explanation-box ${showExp ? 'visible' : ''}">
+          <strong>Explanation —</strong> ${q.explanation || ''}
+        </div>
+      </div>
+    `;
+  }
+
+  function quizToggleOption(qIdx, optIdx) {
+    const q   = examState.questions[qIdx];
+    let sel   = examState.answers[qIdx] ? [...examState.answers[qIdx]] : [];
+
+    if (q.type === 'single') {
+      sel = sel[0] === optIdx ? [] : [optIdx];
+    } else {
+      const pos = sel.indexOf(optIdx);
+      if (pos > -1) sel.splice(pos, 1); else sel.push(optIdx);
+    }
+
+    examState.answers[qIdx] = sel;
+
+    // In immediate mode, lock and re-render once an answer is selected
+    if (examState.feedback === 'immediate' && sel.length > 0) {
+      renderQuizQuestion();
+    } else {
+      // Just toggle visuals without locking
+      document.querySelectorAll('.option-item').forEach((el, i) => {
+        el.classList.toggle('selected', sel.includes(i));
+      });
+    }
+  }
+
+  function quizNavigate(dir) {
+    const total = examState.questions.length;
+    const next  = examState.current + dir;
+    if (next >= total && !examState.reviewMode) { submitExam(); return; }
+    examState.current = Math.max(0, Math.min(next, total - 1));
+    renderQuizQuestion();
+  }
+
+  function quizSkip() {
+    examState.skipped.add(examState.current);
+    delete examState.answers[examState.current];
+    if (examState.current < examState.questions.length - 1) {
+      examState.current++;
+      renderQuizQuestion();
+    } else {
+      submitExam();
+    }
+  }
+
+  function submitExam() {
+    let correct = 0, wrong = 0;
+    const total = examState.questions.length;
+
+    examState.questions.forEach((q, i) => {
+      if (examState.skipped.has(i)) return;
+      const sel = examState.answers[i] || [];
+      const ok  = sel.length === q.correct.length && q.correct.every(c => sel.includes(c));
+      if (ok) correct++; else wrong++;
+    });
+
+    const skipped = examState.skipped.size;
+    const pct     = Math.round((correct / total) * 100);
+    const cls     = pct >= 80 ? 'good' : pct >= 60 ? 'fair' : 'poor';
+    const verdict = pct >= 80 ? 'Strong performance.' : pct >= 60 ? 'Decent — review your misses.' : 'Needs work — revisit the notes.';
+
+    document.getElementById('score-pct-val').textContent  = pct + '%';
+    document.getElementById('score-pct-val').className    = `score-pct ${cls}`;
+    document.getElementById('score-verdict').textContent  = verdict;
+    document.getElementById('sc-correct').textContent  = correct;
+    document.getElementById('sc-wrong').textContent    = wrong;
+    document.getElementById('sc-skipped').textContent  = skipped;
+
+    document.getElementById('exam-quiz-area').classList.remove('visible');
+    document.getElementById('exam-score-screen').classList.add('visible');
+  }
+
+  function examReview() {
+    examState.reviewMode = true;
+    examState.current    = 0;
+    document.getElementById('exam-score-screen').classList.remove('visible');
+    document.getElementById('exam-quiz-area').classList.add('visible');
+    renderQuizQuestion();
+  }
+
+  function examReset() {
+    examState.answers    = {};
+    examState.skipped    = new Set();
+    examState.current    = 0;
+    examState.reviewMode = false;
+    examSelected.clear();
+    document.getElementById('exam-score-screen').classList.remove('visible');
+    document.getElementById('exam-quiz-area').classList.remove('visible');
+    document.getElementById('exam-picker-area').style.display = 'block';
+    loadExamVault();
+    updateGlobalExamBar();
+  }
+
+  function exitQuiz() {
+    examState.reviewMode = false;
+    document.getElementById('exam-quiz-area').classList.remove('visible');
+    document.getElementById('exam-score-screen').classList.remove('visible');
+    document.getElementById('exam-picker-area').style.display = 'block';
+    updateGlobalExamBar();
+  }
+
   // Init
   loadDueBadge();
 </script>

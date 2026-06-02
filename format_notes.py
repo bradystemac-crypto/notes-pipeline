@@ -10,6 +10,10 @@ GEMINI_MODEL = "gemini-2.5-flash"
 FORMAT_PROMPT = r"""
 You are an academic note formatter for a biomedical engineering student at the University of Florida.
 
+-YOU MAY ADD SMALL INTERMEDIATE MATHEMATICAL STEPS IN CONTENT SOLVING PROBLEMS (SUCH AS Using $A = \pi r^2 = \pi (d/2)^2$ FOR EXAMPLE). DO NOT REORGANIZE STEPS. PLEASE PROVIDE CLEAR ATTENTION IF ADDING STEPS
+-YOU MAY ADD VERY SMALL ANNOTATIONS IN MARGINS IF ADDING ADDITIONAL CONTENT (ONE CLARIFYING SENTENCE MAX)
+-YOU MAY ADD ORGANIZE CONTENT OR SOLUTIONS IN A WAY THAT MAKES IT MORE VISUALLY APPEALING BUT DO NOT REOGANIZE STRUCTURE OF PROBLEMS OR NOTES
+
 You will receive raw transcribed content from one or more pages of lecture notes, problem sets, or a mix of both.
 
 STEP 1 — DETECT CONTENT TYPE:
@@ -18,7 +22,7 @@ Before formatting, classify the content as one of:
 - NOTES_ONLY: content is entirely lecture notes with no problems
 - MIXED: content contains both lecture notes and problems/solutions
 
-Apply the correct template based on your classification.
+Apply the correct template based on your classification. All templates use a hybrid structure: sequential per-page content followed by final global headings.
 
 ---
 
@@ -33,29 +37,33 @@ topic: "TOPIC"
 type: "notes"
 ---
 
-# 📌 Key Concepts
-- Bullet points of the main ideas, definitions, and principles from the slides and annotations merged together.
-- Do not separate typed slide content from handwritten annotations — synthesize them into unified concept bullets.
-- If a handwritten annotation clarifies or extends a slide point, merge them into one bullet.
+## Page X
+(Repeat this '## Page X' section block for every single page in the transcription in order. Under each header, present the clean, transcribed text and concept details belonging *only* to that specific page.)
 
-# 📐 Key Equations
-- List all equations in LaTeX, labeled clearly.
+---
+
+# 📌 Global Key Concepts
+- High-level, synthesized bullet points of the main ideas, definitions, and principles across ALL pages combined.
+- Do not separate typed slide content from handwritten annotations — synthesize them into unified concept bullets.
+- If a handwritten annotation clarifies or extends a slide point, merge them into one cohesive bullet.
+
+# 📐 Global Key Equations
+- List all unique equations across all pages in LaTeX, labeled clearly.
 - Use $$ for display equations.
 - Preserve all summation signs with their limits: $\sum_{i=1}^{n}$
 - If none, write "None."
 
-# 🖼️ Diagrams
-- For every [IMAGE: ...] in the transcription, include it here as a descriptive bullet.
+# 🖼️ Global Diagrams
+- Summary list of every [IMAGE: ...] encountered in the transcription.
 - Format: **[Diagram title or subject]:** description of what is shown including labels, axes, arrows, and values.
-- If the diagram directly illustrates a concept, note which concept it supports.
-- Do not skip any diagram even if it seems minor.
+- Note which global concept or problem each diagram supports.
 
-# ❓ Errors / Questions / Gaps
-- Bullet points of anything incomplete, unclear, potentially incorrect, or worth flagging.
+# ❓ Global Errors / Questions / Gaps
+- Bullet points of anything incomplete, unclear, potentially incorrect, or worth flagging across the entire set of notes.
 - If none, write "None identified."
 
-# 📋 Summary
-- Brief bullet point recap of the main ideas covered in the notes.
+# 📋 Global Summary
+- Brief bullet point recap summarizing the core takeaways of the entire document.
 
 # 🔗 Connections
 - [ ] Add connections
@@ -73,43 +81,31 @@ topic: "TOPIC"
 type: "problems"
 ---
 
-# 📝 Problems & Solutions
-ONLY include this section if the notes explicitly contain problems or questions with worked solutions.
-If no problems exist, omit this section entirely.
-
-Format each problem exactly as it appears in the transcription.
+## Page X
+(Repeat this '## Page X' section block for every single page in the transcription in order. Under each header, present the exact problems and stepped solutions belonging *only* to that specific page.)
+- Format each problem exactly as it appears in the transcription.
 - Do not reorganize, relabel, or split work into sub-parts that are not explicitly labeled in the original.
-- If the student wrote all work under "Problem 1" with no sub-labels, keep it all under "Problem 1."
-- If the problem has labeled parts (1a, 1b, 1c), preserve those exact labels — do not add or remove any.
 - Mirror the exact grouping and order of work from the page. Do not reorder steps or consolidate separate problems.
 - Each step of the derivation as a sub-bullet in the order it appears.
-- LaTeX equations inline or display depending on how they appear in the notes.
-- If a diagram is part of the problem or solution, include it inline here:
-  - [IMAGE: description] — describe fully so the problem can be reconstructed.
-- Side calculations/notes (if present):
-  - Sub-bullets for any scratch work or annotations, placed where they appear on the page.
+- Preserve Step ①, Step ② markers for circled numbers exactly as transcribed.
+- Preserve Step Ⓐ, Step Ⓑ markers for circled letters exactly as transcribed.
+- Always use LaTeX for equations. Use $$ for display, $ for inline.
+- Preserve all summation signs with their limits.
 
-Preserve Step ①, Step ② markers for circled numbers exactly as transcribed.
-Preserve Step Ⓐ, Step Ⓑ markers for circled letters exactly as transcribed.
-Use nested bullet points for stepped derivations. If the student worked it out inline, keep it inline.
-Always use LaTeX for equations. Use $$ for display, $ for inline.
-Preserve all summation signs with their limits: $\sum_{i=1}^{n}$
+---
 
-# ❓ Errors / Questions / Gaps
-- Bullet points of anything incomplete, unclear, potentially incorrect, or worth flagging.
+# 📝 Global Problems Overview
+- Comprehensive summary list of all problems covered across all pages, noting their final answers for quick verification.
+
+# ❓ Global Errors / Questions / Gaps
+- Bullet points of any gaps, calculation anomalies, or unworked steps flagged across the entire problem set.
 - If none, write "None identified."
 
-# 📋 Summary
-- Brief bullet point recap of the problems covered and their final answers.
+# 📌 Global Key Concepts
+- Bullet point list of the core engineering or mathematical principles demonstrated by these problems globally.
 
-# 📌 Key Concepts
-- Bullet point list of the most important ideas, definitions, or principles demonstrated by the problems.
-
-# 📐 Key Equations
-- List all important equations used across the problems in LaTeX, labeled clearly.
-- Use $$ for display equations.
-- Preserve all summation signs with their limits.
-- If none, write "None."
+# 📐 Global Key Equations
+- List all major equations utilized across the entire problem set in LaTeX, labeled clearly.
 
 # 🔗 Connections
 - [ ] Add connections
@@ -118,7 +114,6 @@ Preserve all summation signs with their limits: $\sum_{i=1}^{n}$
 
 TEMPLATE C — MIXED:
 Use this when content contains both lecture notes and problems.
-This is the problem set template with an added notes section.
 
 ---
 tags: [lecture, COURSE]
@@ -128,31 +123,29 @@ topic: "TOPIC"
 type: "mixed"
 ---
 
-# 📖 Lecture Notes
-- Bullet points of the main ideas, definitions, and principles from the slides and annotations merged together.
-- Do not separate typed slide content from handwritten annotations — synthesize them into unified concept bullets.
-- If a diagram appears in the notes (not in a problem), include it inline here:
-  - **[Diagram subject]:** full description including labels, axes, arrows, values.
+## Page X
+(Repeat this '## Page X' section block for every single page in the transcription in order. Under each header, present the combination of lecture text and problems belonging *only* to that specific page.)
+- Maintain page notes first, followed by any page-specific problems formatted exactly as in TEMPLATE B.
 
-# 📝 Problems & Solutions
-Format exactly as in TEMPLATE B above.
-If a diagram is part of a problem or solution, include it inline within that problem's bullets.
+---
 
-# ❓ Errors / Questions / Gaps
-- Bullet points of anything incomplete, unclear, potentially incorrect, or worth flagging across both notes and problems.
-- If none, write "None identified."
+# 📖 Global Lecture Notes Synthesis
+- Synthesized bullet points compiling the core lecture ideas, definitions, and slide annotations across all pages.
 
-# 📋 Summary
-- Brief recap covering both the lecture content and the problems.
+# 📝 Global Problems & Solutions Summary
+- A combined ledger of all problems solved throughout the document and their final answers.
 
-# 📌 Key Concepts
-- Key ideas from both the notes and the problems combined.
+# ❓ Global Errors / Questions / Gaps
+- Unified list of any unclear details, errors, or annotations worth investigating further.
 
-# 📐 Key Equations
-- All important equations from both notes and problems in LaTeX, labeled clearly.
-- Use $$ for display equations.
-- Preserve all summation signs with their limits.
-- If none, write "None."
+# 📋 Global Summary
+- Concise absolute recap covering both the theoretical lecture content and the practical problem applications.
+
+# 📌 Global Key Concepts
+- Master list of key engineering ideas bridging the notes and problems together.
+
+# 📐 Global Key Equations
+- Comprehensive list of all math and physics equations used throughout the document in LaTeX.
 
 # 🔗 Connections
 - [ ] Add connections
@@ -167,8 +160,11 @@ GLOBAL RULES — apply to all templates:
 - Do not reorganize or relabel any problem structure — mirror the page exactly.
 - Preserve Step ①②③ markers for circled numbers exactly where they appear.
 - Preserve Step ⒶⒷⒸ markers for circled letters exactly where they appear.
-- Every [IMAGE: ...] from the transcription must appear somewhere in the output — either inline in a problem, inline in notes, or in the Diagrams section. Never drop an image.
 - Return only raw markdown. Do not wrap the output in a code block or backticks of any kind.
+- Every individual page's content block MUST start with a top-level '## Page X' header (e.g., ## Page 2, ## Page 3) matching its original layout index.
+- The global summary headings (# 📌 Global Key Concepts, etc.) MUST appear at the very end of the document, completely below all the page blocks.
+
+- 🚨 ONENOTE COVER SHEET EXCLUSION: If the transcription for 'PAGE 1' contains only header metadata (such as a page title, date/time stamps, [ruled paper lines], or a PDF file icon) but contains NO actual lecture notes, equations, or worked problems, OMIT IT ENTIRELY. Do not generate a '## Page 1' header or any text for it. Start your notes directly with '## Page 2'.
 
 ------------------------------------------------------------
 1. YAML FRONTMATTER (FIRST SECTION)
@@ -194,8 +190,8 @@ YAML RULES:
 - No additional fields allowed
 - No markdown inside YAML
 - No wiki-links [[...]] anywhere
-
 """
+
 
 def format_notes(transcriptions, course, topic):
     if not transcriptions:
