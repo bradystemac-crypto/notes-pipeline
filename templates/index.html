@@ -231,6 +231,13 @@
     .modal-field label { display: block; font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); margin-bottom: 0.4rem; }
     .modal-field input,
     .modal-field select { width: 100%; background: var(--bg); border: 1.5px solid var(--rule); border-radius: 8px; padding: 0.65rem 0.9rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--ink); outline: none; transition: border-color 0.2s; appearance: none; }
+    .modal-field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b6560' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.9rem center;
+      background-size: 1rem;
+      padding-right: 2.5rem;
+    }
     .modal-field input:focus,
     .modal-field select:focus { border-color: var(--punch); }
     .modal-field .input-row { margin-top: 0; }
@@ -242,15 +249,77 @@
     .modal-cancel:hover { border-color: var(--ink); color: var(--ink); }
     .summary-result { background: var(--bg); border-radius: 8px; padding: 1rem; margin-top: 1rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--ink2); line-height: 1.7; max-height: 160px; overflow-y: auto; display: none; }
 
-    /* ── Exam Tab ── */
-    /* Config row at top */
-    .exam-config-bar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem; flex-wrap: wrap; }
-    .exam-config-bar .modal-field { margin-bottom: 0; flex: 1; min-width: 120px; }
-    .exam-config-bar .modal-field label { margin-bottom: 0.3rem; }
-    .exam-toggle-group { display: flex; background: var(--surface); border: 1.5px solid var(--rule); border-radius: 8px; overflow: hidden; }
-    .exam-toggle { padding: 0.6rem 1rem; font-family: 'DM Mono', monospace; font-size: 0.72rem; border: none; background: transparent; color: var(--ink2); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-    .exam-toggle.active { background: var(--ink); color: #f5f2ed; }
-    .exam-toggle:not(:last-child) { border-right: 1.5px solid var(--rule); }
+  /* ── Exam Tab ── */
+/* Config row at top */
+.exam-config-bar {
+  display: grid;
+  /* FIX: Squeezing the outer columns to 1.2fr to force text stacking 
+     while keeping the questions column track compact */
+  grid-template-columns: 1.4fr 2fr 65px 160px; 
+  gap: 0.75rem 1rem;
+  margin-bottom: 2rem;
+  align-items: start;
+}
+
+.exam-config-bar .modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.exam-config-bar .modal-field label {
+  margin-bottom: 0.3rem;
+}
+
+.exam-config-bar .modal-field > *:not(label) {
+  height: 42px; 
+  box-sizing: border-box;
+}
+
+.exam-toggle-group {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.exam-toggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 0.4rem; 
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  line-height: 1.2; 
+  border: none;
+  background: transparent;
+  color: var(--ink2);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.exam-toggle.active {
+  background: var(--ink);
+  color: #f5f2ed;
+}
+
+.exam-toggle:not(:last-child) {
+  border-right: 1.5px solid var(--rule);
+}
+
+/* FIX: Narrowed down the max-width to 55px to tightly hug 
+   the double-digit input without drowning in extra white space */
+.exam-config-bar .modal-field input {
+  width: 100%;
+  max-width: 65px; 
+  box-sizing: border-box;
+}
 
     /* Exam note table — same as vault but narrower columns */
     .exam-note-row { display: grid; grid-template-columns: 20px 1fr 90px 70px; align-items: center; gap: 1rem; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--rule); transition: background 0.15s; cursor: pointer; }
@@ -326,6 +395,172 @@
     .btn-score.filled { background: var(--ink); border: 1.5px solid var(--ink); color: #f5f2ed; }
     .btn-score.filled:hover { opacity: 0.85; }
 
+    /* ── Flashcard Styles ── */
+    .fc-card-container {
+      perspective: 1000px;
+      width: 100%;
+      max-width: 650px;
+      height: 380px;
+      margin: 2rem auto;
+      cursor: pointer;
+    }
+    .fc-card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .fc-card.flipped {
+      transform: rotateY(180deg);
+    }
+    .fc-card-front, .fc-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border: 1.5px solid var(--rule);
+      border-radius: 12px;
+      background: var(--surface);
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    }
+    .fc-card-back {
+      transform: rotateY(180deg);
+      border-color: var(--punch);
+    }
+    .fc-card-type {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--ink3);
+      text-transform: uppercase;
+    }
+    .fc-card-text {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--ink);
+      text-align: center;
+      margin: auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
+      max-height: 100%;
+    }
+    .fc-card-tip {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--ink3);
+      text-align: center;
+      border-top: 1px solid var(--rule);
+      padding-top: 0.75rem;
+    }
+    .fc-card-back .fc-card-tip {
+      border-top-color: var(--punch-light);
+    }
+    .fc-card-back .fc-card-text {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 300;
+      line-height: 1.6;
+      text-align: left;
+      overflow-y: auto;
+      max-height: 100%;
+    }
+    
+    .fc-study-controls {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+      max-width: 650px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .btn-fc-action {
+      background: var(--ink);
+      border: 1.5px solid var(--ink);
+      color: #f5f2ed;
+      border-radius: 8px;
+      padding: 0.8rem 2.5rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-fc-action:hover {
+      opacity: 0.85;
+    }
+    .fc-score-explanation {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--ink2);
+      text-align: center;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .fc-score-options {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .btn-score-option {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.6rem 0.4rem;
+      border-radius: 8px;
+      border: 1.5px solid var(--rule);
+      background: var(--surface);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-score-option .score-num {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.1rem;
+    }
+    .btn-score-option .score-lbl {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--ink2);
+      text-transform: uppercase;
+    }
+    .btn-score-option:hover {
+      transform: translateY(-2px);
+    }
+    .btn-score-option.score-0:hover { border-color: #dc2626; background: #fee2e2; }
+    .btn-score-option.score-1:hover { border-color: #ef4444; background: #fef2f2; }
+    .btn-score-option.score-2:hover { border-color: #f97316; background: #fff7ed; }
+    .btn-score-option.score-3:hover { border-color: #eab308; background: #fef9c3; }
+    .btn-score-option.score-4:hover { border-color: #10b981; background: #ecfdf5; }
+    .btn-score-option.score-5:hover { border-color: #059669; background: #d1fae5; }
+    
+    .fc-note-row {
+      display: grid;
+      grid-template-columns: 20px 1fr 120px;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid var(--rule);
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+    .fc-note-row:last-child { border-bottom: none; }
+    .fc-note-row:hover { background: #faf8f5; }
+    .fc-note-row.header-row { background: var(--bg); padding: 0.5rem 1.25rem; cursor: default; }
+    .fc-note-row.selected { background: var(--punch-light); }
+
     /* Animations */
     @keyframes spin { to { transform: rotate(360deg); } }
     .spin { animation: spin 0.8s linear infinite; display: inline-block; }
@@ -383,6 +618,9 @@
       </button>
       <button class="nav-item" onclick="showPage('exam')" id="nav-exam">
         <i class="fa fa-bolt"></i> Exam Prep
+      </button>
+      <button class="nav-item" onclick="showPage('flashcards')" id="nav-flashcards">
+        <i class="fa fa-clone"></i> Flashcards
       </button>
     </nav>
 
@@ -548,15 +786,15 @@
             <span class="section-title">Configure</span>
             <div class="section-rule"></div>
           </div>
-          <div style="display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-end;">
-            <div class="modal-field" style="margin:0; flex:1; min-width:140px;">
+          <div class="exam-config-bar">
+            <div class="modal-field">
               <label>Question Type</label>
               <div class="exam-toggle-group">
                 <button class="exam-toggle active" id="toggle-single" onclick="setExamType('single', this)">Single Answer</button>
                 <button class="exam-toggle" id="toggle-multiple" onclick="setExamType('multiple', this)">Multi-Answer</button>
               </div>
             </div>
-            <div class="modal-field" style="margin:0; flex:1; min-width:140px;">
+            <div class="modal-field">
               <label>Difficulty</label>
               <select id="exam-difficulty">
                 <option value="easy">Easy — direct recall</option>
@@ -564,11 +802,11 @@
                 <option value="hard">Hard — synthesize</option>
               </select>
             </div>
-            <div class="modal-field" style="margin:0; width:110px;">
+            <div class="modal-field" style="flex: none; width: 110px;">
               <label>Questions</label>
               <input type="number" id="exam-count" value="10" min="1" max="50" style="background:var(--surface);border:1.5px solid var(--rule);border-radius:8px;padding:0.65rem 0.9rem;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--ink);outline:none;width:100%;"/>
             </div>
-            <div class="modal-field" style="margin:0; flex:1; min-width:140px;">
+            <div class="modal-field">
               <label>Feedback</label>
               <div class="exam-toggle-group">
                 <button class="exam-toggle active" id="toggle-feedback-end" onclick="setFeedbackMode('end', this)">After Exam</button>
@@ -629,6 +867,127 @@
       </div>
     </div>
 
+    <!-- ══ FLASHCARDS PAGE ══ -->
+    <div id="page-flashcards" style="display:none;">
+      <div class="page-title">Flashcards</div>
+      <div class="page-sub">Select notes to generate and study flashcards using active recall</div>
+
+      <!-- Selection interface (hidden during active study) -->
+      <div id="fc-picker-area">
+        <!-- Configuration section -->
+        <div class="section-block">
+          <div class="section-head">
+            <span class="section-num">01</span>
+            <span class="section-title">Configure Deck</span>
+            <div class="section-rule"></div>
+          </div>
+          <div class="exam-config-bar">
+          </div>
+          <div class="modal-field" style="margin:0; flex:1; min-width:200px;">
+            <label>Difficulty</label>
+            <select id="fc-difficulty">
+              <option value="easy">Easy — core conceptual definitions and terms</option>
+              <option value="medium" selected>Medium — operational mechanisms, pathways, and relations</option>
+              <option value="hard">Hard — multi-system synthesis and engineering tradeoffs</option>
+            </select>
+          </div>
+          <div class="modal-field" style="margin:0; width:120px;">
+            <label>Card Count</label>
+            <input type="number" id="fc-count" value="10" min="1" max="50" style="background:var(--surface);border:1.5px solid var(--rule);border-radius:8px;padding:0.65rem 0.9rem;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--ink);outline:none;width:100%;"/>
+          </div>
+        </div>
+      </div>
+
+        <!-- Note Selection section -->
+        <div class="section-block">
+          <div class="section-head">
+            <span class="section-num">02</span>
+            <span class="section-title">Select Notes</span>
+            <div class="section-rule"></div>
+          </div>
+          <div id="fc-error" style="display:none; background:#fee2e2; border:1.5px solid #fca5a5; border-radius:8px; padding:0.75rem 1rem; margin-bottom:1rem; font-family:'DM Mono',monospace; font-size:0.75rem; color:#dc2626;"></div>
+          <div id="fc-notes-list">
+            <div class="empty-state"><i class="fa fa-spinner spin"></i>Loading vault notes...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Study area (hidden during setup) -->
+      <div id="fc-study-area" style="display:none;">
+        <div class="quiz-topbar">
+          <button class="quiz-back" onclick="exitFlashcards()">← Back</button>
+          <div class="quiz-progress-wrap">
+            <div class="quiz-progress-fill" id="fc-progress-fill" style="width:0%"></div>
+          </div>
+          <span class="quiz-progress-label" id="fc-progress-label">1 / 10</span>
+        </div>
+
+        <!-- Flipped card container -->
+        <div class="fc-card-container">
+          <div class="fc-card" id="fc-card-element" onclick="flipCard()">
+            <div class="fc-card-front">
+              <div class="fc-card-type">QUESTION</div>
+              <div class="fc-card-text" id="fc-front-text">Loading question...</div>
+              <div class="fc-card-tip">Click card to reveal answer</div>
+            </div>
+            <div class="fc-card-back">
+              <div class="fc-card-type">ANSWER</div>
+              <div class="fc-card-text" id="fc-back-text">Loading answer...</div>
+              <div class="fc-card-tip">Click card to flip back</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Study controls -->
+        <div class="fc-study-controls" id="fc-study-controls">
+          <!-- Flip button (hidden when flipped) -->
+          <button class="btn-fc-action" id="btn-fc-flip" onclick="flipCard()">Show Answer</button>
+
+          <!-- Scoring buttons (shown when flipped) -->
+          <div id="fc-scoring-buttons" style="display:none; width:100%;">
+            <div class="fc-score-explanation">How well did you remember this?</div>
+            <div class="fc-score-options">
+              <button class="btn-score-option score-0" onclick="rateCard(0)">
+                <span class="score-num">0</span>
+                <span class="score-lbl">Blackout</span>
+              </button>
+              <button class="btn-score-option score-1" onclick="rateCard(1)">
+                <span class="score-num">1</span>
+                <span class="score-lbl">Familiar</span>
+              </button>
+              <button class="btn-score-option score-2" onclick="rateCard(2)">
+                <span class="score-num">2</span>
+                <span class="score-lbl">Hardest</span>
+              </button>
+              <button class="btn-score-option score-3" onclick="rateCard(3)">
+                <span class="score-num">3</span>
+                <span class="score-lbl">Hard</span>
+              </button>
+              <button class="btn-score-option score-4" onclick="rateCard(4)">
+                <span class="score-num">4</span>
+                <span class="score-lbl">Good</span>
+              </button>
+              <button class="btn-score-option score-5" onclick="rateCard(5)">
+                <span class="score-num">5</span>
+                <span class="score-lbl">Perfect</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results screen (hidden during study) -->
+      <div id="fc-results-screen" style="display:none;">
+        <div class="score-card">
+          <div class="score-pct good" id="fc-results-count">Finished!</div>
+          <div class="score-verdict">You've studied all flashcards in this deck. Review updates have been committed.</div>
+          <div class="score-actions">
+            <button class="btn-score filled" onclick="exitFlashcards()">Finish Study Session</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Summary modal -->
     <div class="modal-overlay hidden" id="summary-modal">
       <div class="modal-box">
@@ -675,13 +1034,20 @@
 
   // ── Page routing ──────────────────────────────────────────────────────────
   function showPage(page) {
-    ['upload','review','vault','exam'].forEach(p => {
-      document.getElementById(`page-${p}`).style.display = p === page ? 'block' : 'none';
-      document.getElementById(`nav-${p}`).classList.toggle('active', p === page);
+    ['upload','review','vault','exam','flashcards'].forEach(p => {
+      const el = document.getElementById(`page-${p}`);
+      if (el) el.style.display = p === page ? 'block' : 'none';
+      const navEl = document.getElementById(`nav-${p}`);
+      if (navEl) navEl.classList.toggle('active', p === page);
     });
+
+    hideGlobalExamBar();
+    hideGlobalFcBar();
+
     if (page === 'review') loadReview();
     if (page === 'vault')  loadVault();
-    if (page === 'exam')   loadExamVault();
+    if (page === 'exam')   { loadExamVault(); updateGlobalExamBar(); }
+    if (page === 'flashcards') { loadFlashcardsVault(); updateGlobalFcBar(); }
   }
 
   // ── Pipeline ──────────────────────────────────────────────────────────────
@@ -978,7 +1344,7 @@
       if (isSelected) row.classList.add('selected');
       row.innerHTML = `
         <input type="checkbox" class="note-check" ${isSelected ? 'checked' : ''}/>
-        <div class="note-topic" title="${note.name}">${note.topic}</div>
+        <div class="note-topic" title="${note.path}">${note.name}</div>
         <div class="note-modified">${modStr}</div>
         <div><span class="type-chip ${typeClass}">${typeLabel}</span></div>
         <div>${itemsHtml}</div>
@@ -1221,7 +1587,7 @@
 
       row.innerHTML = `
         <input type="checkbox" class="note-check" ${isSelected ? 'checked' : ''}/>
-        <div class="note-topic" title="${note.name}">${note.topic}</div>
+        <div class="note-topic" title="${note.path}">${note.name}</div>
         <div class="note-modified">${modStr}</div>
         <div><span class="type-chip ${typeClass}">${note.type || '—'}</span></div>
       `;
@@ -1522,6 +1888,337 @@
     document.getElementById('exam-score-screen').classList.remove('visible');
     document.getElementById('exam-picker-area').style.display = 'block';
     updateGlobalExamBar();
+  }
+
+  // ── Flashcards Tab ─────────────────────────────────────────────────────────
+  let fcSelected = new Map(); // path → { name, course }
+  let fcState = {
+    cards: [],
+    current: 0,
+    isFlipped: false
+  };
+  let globalFcBar = null;
+
+  async function hashString(str) {
+    try {
+      const msgBuffer = new TextEncoder().encode(str);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return 'fb_' + Math.abs(hash).toString(16);
+    }
+  }
+
+  function hideGlobalFcBar() {
+    if (globalFcBar) globalFcBar.style.transform = 'translateY(110%)';
+  }
+
+  function updateGlobalFcBar() {
+    const total = fcSelected.size;
+    if (!globalFcBar) {
+      globalFcBar = document.createElement('div');
+      globalFcBar.id = 'global-fc-bar';
+      globalFcBar.style.cssText = 'position:fixed;bottom:0;right:0;left:260px;background:var(--ink);padding:1rem 3.5rem;display:flex;align-items:center;gap:1rem;z-index:50;transition:transform 0.25s;';
+      globalFcBar.innerHTML = `
+        <div style="flex:1;font-family:'DM Mono',monospace;font-size:0.75rem;color:#b5b0aa;">
+          <strong id="global-fc-count" style="color:#f5f2ed;">0</strong> notes selected for flashcards
+        </div>
+        <button onclick="startFlashcards()" style="background:var(--punch);color:#fff;border:none;border-radius:6px;padding:0.6rem 1.5rem;font-family:'Syne',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">
+          <i class="fa fa-clone"></i> Generate Flashcards
+        </button>
+      `;
+      document.body.appendChild(globalFcBar);
+    }
+    const pageVisible = document.getElementById('page-flashcards').style.display === 'block' && document.getElementById('fc-picker-area').style.display !== 'none';
+    globalFcBar.style.transform = (total > 0 && pageVisible) ? 'translateY(0)' : 'translateY(110%)';
+    const counter = document.getElementById('global-fc-count');
+    if (counter) counter.textContent = total;
+  }
+
+  function loadFlashcardsVault() {
+    fetch('/api/vault/files')
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success) {
+          document.getElementById('fc-notes-list').innerHTML = `<div class="empty-state"><i class="fa fa-exclamation-triangle"></i>${data.error || 'Could not load files.'}</div>`;
+          return;
+        }
+        
+        const courses = {};
+        data.files.forEach(file => {
+          const parts = file.name.split(' / ');
+          const course = parts[0] || 'Unsorted';
+          const topic = parts.slice(1).join(' / ') || file.name;
+          if (!courses[course]) courses[course] = [];
+          courses[course].push({
+            path: file.path,
+            name: file.name,
+            topic: topic
+          });
+        });
+        
+        renderFcPicker(courses);
+      })
+      .catch(err => {
+        console.error("FLASHCARDS VAULT FETCH FAILED:", err);
+        document.getElementById('fc-notes-list').innerHTML =
+          '<div class="empty-state"><i class="fa fa-exclamation-triangle"></i>Could not load files.</div>';
+      });
+  }
+
+  function renderFcPicker(courses) {
+    const container = document.getElementById('fc-notes-list');
+    container.innerHTML = '';
+    if (Object.keys(courses).length === 0) {
+      container.innerHTML = '<div class="empty-state"><i class="fa fa-folder-open"></i>No notes found in vault.</div>';
+      return;
+    }
+    Object.entries(courses).sort().forEach(([course, notes]) => {
+      container.appendChild(buildFcCourseBlock(course, notes));
+    });
+  }
+
+  function buildFcCourseBlock(course, notes) {
+    const block = document.createElement('div');
+    block.className = 'course-block';
+
+    const header = document.createElement('div');
+    header.className = 'course-header';
+    header.innerHTML = `
+      <div class="section-rule" style="width:24px;flex:none;"></div>
+      <div class="course-name">${course}</div>
+      <div class="course-count">${notes.length} note${notes.length !== 1 ? 's' : ''}</div>
+      <div class="section-rule"></div>
+      <i class="fa fa-chevron-down course-toggle" id="fc-toggle-${course}"></i>
+    `;
+
+    const table = document.createElement('div');
+    table.className = 'note-table';
+    table.id = `fc-table-${course}`;
+    table.innerHTML = `
+      <div class="fc-note-row header-row">
+        <div></div>
+        <div class="col-header">Topic</div>
+        <div class="col-header">Path</div>
+      </div>
+    `;
+
+    notes.forEach(note => {
+      const row = document.createElement('div');
+      row.className = 'fc-note-row';
+      row.dataset.path = note.path;
+      row.dataset.course = course;
+      row.dataset.name = note.name;
+
+      const isSelected = fcSelected.has(note.path);
+      if (isSelected) row.classList.add('selected');
+
+      row.innerHTML = `
+        <input type="checkbox" class="note-check" ${isSelected ? 'checked' : ''}/>
+        <div class="note-topic" title="${note.name}">${note.topic}</div>
+        <div style="font-family:'DM Mono',monospace; font-size:0.65rem; color:var(--ink3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${note.path}">${note.path}</div>
+      `;
+
+      const cb = row.querySelector('.note-check');
+      cb.addEventListener('click', e => {
+        e.stopPropagation();
+        toggleFcSelect(note.path, note.name, course, cb.checked);
+      });
+      row.addEventListener('click', e => {
+        if (e.target.classList.contains('note-check')) return;
+        cb.checked = !cb.checked;
+        toggleFcSelect(note.path, note.name, course, cb.checked);
+      });
+
+      table.appendChild(row);
+    });
+
+    const bar = document.createElement('div');
+    bar.className = 'exam-action-bar';
+    bar.id = `fc-bar-${course}`;
+    bar.innerHTML = `
+      <div class="summary-bar-info"><strong id="fc-bar-count-${course}">0</strong> notes selected from ${course}</div>
+      <button class="btn-clear-sel" onclick="clearFcCourse('${course}')">Clear</button>
+    `;
+    table.appendChild(bar);
+
+    header.addEventListener('click', () => {
+      const toggle = document.getElementById(`fc-toggle-${course}`);
+      const collapsed = table.style.display === 'none';
+      table.style.display = collapsed ? 'block' : 'none';
+      toggle.classList.toggle('collapsed', !collapsed);
+    });
+
+    block.appendChild(header);
+    block.appendChild(table);
+    
+    setTimeout(() => updateFcBar(course), 0);
+    return block;
+  }
+
+  function toggleFcSelect(path, name, course, state) {
+    if (state) fcSelected.set(path, { name, course });
+    else fcSelected.delete(path);
+    document.querySelectorAll(`.fc-note-row[data-path="${path}"]`).forEach(r => r.classList.toggle('selected', state));
+    updateFcBar(course);
+    updateGlobalFcBar();
+  }
+
+  function updateFcBar(course) {
+    const count = [...fcSelected.values()].filter(v => v.course === course).length;
+    const bar = document.getElementById(`fc-bar-${course}`);
+    const num = document.getElementById(`fc-bar-count-${course}`);
+    if (!bar) return;
+    bar.classList.toggle('visible', count > 0);
+    if (num) num.textContent = count;
+  }
+
+  function clearFcCourse(course) {
+    [...fcSelected.entries()].forEach(([path, val]) => {
+      if (val.course === course) {
+        fcSelected.delete(path);
+        document.querySelectorAll(`.fc-note-row[data-path="${path}"]`).forEach(r => {
+          r.classList.remove('selected');
+          const cb = r.querySelector('.note-check');
+          if (cb) cb.checked = false;
+        });
+      }
+    });
+    updateFcBar(course);
+    updateGlobalFcBar();
+  }
+
+  async function startFlashcards() {
+    const paths = [...fcSelected.keys()];
+    if (!paths.length) { showFcError('Select at least one note.'); return; }
+
+    const count = parseInt(document.getElementById('fc-count').value, 10);
+    if (isNaN(count) || count < 1 || count > 50) { showFcError('Card count must be 1–50.'); return; }
+
+    showFcError('');
+
+    const genBtn = globalFcBar.querySelector('button');
+    genBtn.disabled = true;
+    genBtn.innerHTML = '<i class="fa fa-circle-notch spin"></i> Generating...';
+
+    try {
+      const res = await fetch('/api/flashcards/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          note_paths: paths,
+          count: count,
+          difficulty: document.getElementById('fc-difficulty').value
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) { showFcError(data.error || 'Generation failed.'); return; }
+
+      const cards = data.cards || [];
+      for (let i = 0; i < cards.length; i++) {
+        cards[i].id = await hashString(cards[i].front);
+      }
+
+      fcState.cards = cards;
+      fcState.current = 0;
+      fcState.isFlipped = false;
+
+      if (fcState.cards.length === 0) {
+        showFcError('No flashcards were generated. Try checking your note contents.');
+        return;
+      }
+
+      document.getElementById('fc-picker-area').style.display = 'none';
+      hideGlobalFcBar();
+      document.getElementById('fc-results-screen').style.display = 'none';
+      document.getElementById('fc-study-area').style.display = 'block';
+      renderFcCard();
+
+    } catch (err) {
+      showFcError('Network error: ' + err.message);
+    } finally {
+      genBtn.disabled = false;
+      genBtn.innerHTML = '<i class="fa fa-clone"></i> Generate Flashcards';
+    }
+  }
+
+  function showFcError(msg) {
+    const el = document.getElementById('fc-error');
+    el.textContent = msg;
+    el.style.display = msg ? 'block' : 'none';
+  }
+
+  function renderFcCard() {
+    const total = fcState.cards.length;
+    const card = fcState.cards[fcState.current];
+
+    const progressPct = ((fcState.current) / total) * 100;
+    document.getElementById('fc-progress-fill').style.width = progressPct + '%';
+    document.getElementById('fc-progress-label').textContent = `${fcState.current + 1} / ${total}`;
+
+    document.getElementById('fc-front-text').textContent = card.front;
+    document.getElementById('fc-back-text').textContent = card.back;
+
+    fcState.isFlipped = false;
+    document.getElementById('fc-card-element').classList.remove('flipped');
+
+    document.getElementById('btn-fc-flip').style.display = 'block';
+    document.getElementById('fc-scoring-buttons').style.display = 'none';
+  }
+
+  function flipCard() {
+    fcState.isFlipped = !fcState.isFlipped;
+    const cardEl = document.getElementById('fc-card-element');
+    cardEl.classList.toggle('flipped', fcState.isFlipped);
+
+    if (fcState.isFlipped) {
+      document.getElementById('btn-fc-flip').style.display = 'none';
+      document.getElementById('fc-scoring-buttons').style.display = 'block';
+    } else {
+      document.getElementById('btn-fc-flip').style.display = 'block';
+      document.getElementById('fc-scoring-buttons').style.display = 'none';
+    }
+  }
+
+  async function rateCard(score) {
+    const card = fcState.cards[fcState.current];
+    
+    try {
+      await fetch('/api/flashcards/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          card_id: card.id,
+          score: score
+        })
+      });
+    } catch (err) {
+      console.error('Failed to submit review score:', err);
+    }
+
+    if (fcState.current < fcState.cards.length - 1) {
+      fcState.current++;
+      renderFcCard();
+    } else {
+      document.getElementById('fc-progress-fill').style.width = '100%';
+      document.getElementById('fc-study-area').style.display = 'none';
+      document.getElementById('fc-results-screen').style.display = 'block';
+    }
+  }
+
+  function exitFlashcards() {
+    document.getElementById('fc-study-area').style.display = 'none';
+    document.getElementById('fc-results-screen').style.display = 'none';
+    document.getElementById('fc-picker-area').style.display = 'block';
+    fcSelected.clear();
+    loadFlashcardsVault();
+    updateGlobalFcBar();
   }
 
   // Init

@@ -12,10 +12,14 @@ from flask import Flask, request, jsonify, send_file, Response, render_template
 from matplotlib.pylab import rint
 from exam_routes import exam_bp
 from config import OBSIDIAN_VAULT_PATH
+from flashcards import FlashcardEngine
 
 app = Flask(__name__)
 
 app.register_blueprint(exam_bp)
+
+# Initialize Flashcard Engine
+fc_engine = FlashcardEngine()
 
 # Thread-safe queue for streaming progress updates
 progress_queues = {}
@@ -219,8 +223,6 @@ def download(job_id):
     return send_file(output_path, as_attachment=True, download_name="notes.md")
 
 
-
-
 @app.route("/review")
 def review():
     """Returns all notes due for review as JSON"""
@@ -272,7 +274,6 @@ def review_all():
     return jsonify(result)
 
 
-
 @app.route("/vault")
 def vault():
     """Scans Obsidian vault and returns structured course/note data"""
@@ -280,7 +281,6 @@ def vault():
     from tracker import load_tracker
     import os
     from datetime import date
-
 
     tracker = load_tracker()
     today = date.today()
@@ -367,11 +367,9 @@ def vault():
     for course in courses:
         courses[course].sort(key=lambda x: x["modified"], reverse=True)
 
-
     total_notes = sum(len(n) for n in courses.values())
     total_questions = sum(note["questions"] for notes in courses.values() for note in notes)
     total_connections = sum(note["connections"] for notes in courses.values() for note in notes)
-
 
     return jsonify({
         "courses": courses,
@@ -382,6 +380,7 @@ def vault():
             "total_connections": total_connections
         }
     })
+
 
 @app.route("/summary/generate", methods=["POST"])
 def summary_generate():
@@ -426,6 +425,77 @@ def summary_generate():
         return jsonify({"error": str(e)}), 400
     except RuntimeError as e:
         return jsonify({"error": str(e)}), 500
+
+
+# ── Flashcard System API Endpoints ──────────────────────────────────────────
+
+@app.route('/api/vault/files', methods=['GET'])
+def list_vault_files():
+    """Scans Obsidian vault and yields clean file profiles for the checklist."""
+    try:
+        vault_files = []
+        for root, dirs, files in os.walk(OBSIDIAN_VAULT_PATH):
+            dirs[:] = [d for d in dirs if not d.startswith(".")]
+            for file in files:
+                if file.endswith('.md'):
+                    full_path = os.path.normpath(os.path.abspath(os.path.join(root, file)))
+                    rel_path = os.path.relpath(full_path, OBSIDIAN_VAULT_PATH)
+                    display_name = rel_path.replace('.md', '').replace('\\', ' / ')
+                    
+                    vault_files.append({
+                        "path": full_path,
+                        "name": display_name
+                    })
+        return jsonify({"success": True, "files": sorted(vault_files, key=lambda x: x['name'])})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/flashcards/generate", methods=["POST"])
+def flashcards_generate():
+    """Reads target notes, merges text blocks, and prompts Gemini for processing."""
+    data = request.get_json() or {}
+    note_paths = data.get("note_paths", [])
+    difficulty = data.get("difficulty", "medium")
+    count = int(data.get("count", 10))
+
+    if not note_paths:
+        return jsonify({"error": "No source notes selected for generation."}), 400
+
+    combined_content = ""
+    for path in note_paths:
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    combined_content += f.read() + "\n\n"
+            except Exception as e:
+                print(f"Skipping unreadable file path {path}: {e}")
+
+    if not combined_content.strip():
+        return jsonify({"error": "Selected files contain no extraction source data."}), 400
+
+    try:
+        cards = fc_engine.generate_deck_from_notes(combined_content, difficulty=difficulty, count=count)
+        return jsonify({"success": True, "cards": cards})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/flashcards/review", methods=["POST"])
+def flashcards_review():
+    """Processes user response quality scores (0-5) and commits SM-2 updates."""
+    data = request.get_json() or {}
+    card_id = data.get("card_id")
+    score = data.get("score")
+
+    if card_id is None or score is None:
+        return jsonify({"error": "Missing card_id or score parameters."}), 400
+
+    try:
+        updated_metadata = fc_engine.update_card_review(str(card_id), int(score))
+        return jsonify({"success": True, "metadata": updated_metadata})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 if __name__ == "__main__":
