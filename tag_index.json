@@ -664,5 +664,64 @@
     "topic": "intro48",
     "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro48_2026-06-02.md",
     "date": "2026-06-02"
+  },
+  "intro60_2026-06-03": {
+    "tags": [
+      "lecture",
+      "BME3053"
+    ],
+    "themes": [
+      "Mass conservation in open steady-state systems",
+      "Fluorescence-activated cell sorting mass balance",
+      "Multi-component cell separation accounting equations",
+      "Volumetric and mass flow rate relationships",
+      "System boundary definition in microfluidic sorting",
+      "Species mass fraction conservation modeling"
+    ],
+    "course": "BME3053",
+    "topic": "ProbSet 4.2",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro60_2026-06-03.md",
+    "date": "2026-06-03"
+  },
+  "intro61_2026-06-05": {
+    "tags": [
+      "steady-state-system",
+      "molar-balance",
+      "mass-balance",
+      "stoichiometric-coefficient",
+      "reaction-rate",
+      "fractional-conversion",
+      "continuous-reactor",
+      "bioreactor-design",
+      "mammalian-cell-culture",
+      "glutamic-acid-synthesis",
+      "glucose-metabolism",
+      "ethanol-fermentation",
+      "molar-flow-rate",
+      "mass-flow-rate",
+      "stoichiometry",
+      "species-conservation",
+      "molecular-weight-calculation",
+      "biochemical-engineering",
+      "reacting-system",
+      "generation-term",
+      "consumption-term",
+      "carbon-dioxide-production",
+      "ammonia-consumption",
+      "inflow-rate",
+      "outflow-rate"
+    ],
+    "themes": [
+      "Steady state bioreactor species balances",
+      "Stoichiometric relationships in metabolic reactions",
+      "Fractional conversion of glucose substrate",
+      "Molar and mass flow rate transformations",
+      "Reaction rate calculations using stoichiometry",
+      "Continuous system mass conservation equations"
+    ],
+    "course": "BME3053",
+    "topic": "intro61",
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro61_2026-06-05.md",
+    "date": "2026-06-05"
   }
 }

@@ -37,8 +37,9 @@
   "intro10_2026-05-30.md": {
     "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro10_2026-05-30.md",
     "created": "2026-05-30",
-    "review_stage": 0,
-    "next_review": "2026-05-31"
+    "review_stage": 1,
+    "next_review": "2026-06-08",
+    "last_reviewed": "2026-06-05"
   },
   "intro11_2026-05-30.md": {
     "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro11_2026-05-30.md",
@@ -191,5 +192,11 @@
     "created": "2026-06-02",
     "review_stage": 0,
     "next_review": "2026-06-03"
+  },
+  "intro61_2026-06-05.md": {
+    "path": "C:\\Users\\brady\\OneDrive\\Documents\\Class notes\\BME3053\\intro61_2026-06-05.md",
+    "created": "2026-06-05",
+    "review_stage": 0,
+    "next_review": "2026-06-06"
   }
 }
